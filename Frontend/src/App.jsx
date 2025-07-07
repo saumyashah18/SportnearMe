@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/home.jsx";
+import Home from "./pages/Home";
 import SignupHost from "./pages/SignupHost";
 import AccountSetupHost from "./pages/AccountSetupHost";
 import DashboardHost from "./pages/DashboardHost";
