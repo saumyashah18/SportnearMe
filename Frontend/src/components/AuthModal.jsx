@@ -246,7 +246,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <h2 className="text-center text-xl font-semibold mb-4">
               Select Sports You Like
             </h2>
-            <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto mb-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
               {sportsData.map((sport) => (
                 <div
                   key={sport.name}
@@ -296,7 +296,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
               onClick={handleComplete}
               className="w-full py-2 rounded bg-green-600 hover:bg-green-500"
             >
-              Finish & Go to Dashboard
+              YAYY! You are all set!
             </button>
           </>
         )}
