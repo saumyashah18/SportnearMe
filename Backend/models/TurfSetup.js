@@ -7,15 +7,16 @@ const turfSchema = new mongoose.Schema({
   city: { type: String },
   location: {
     type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number] }
+    coordinates: { type: [Number] }  // [longitude, latitude]
   },
   primaryImage: { type: String },
   images: [{ type: String }],
+
   sports: [
     {
       name: { type: String, required: true },
-      fromTime: { type: String },
-      toTime: { type: String },
+      fromTime: { type: String },   // e.g., "08:00 AM"
+      toTime: { type: String },     // e.g., "10:00 PM"
       pricing: {
         '30min': Number,
         '45min': Number,
@@ -24,8 +25,29 @@ const turfSchema = new mongoose.Schema({
       }
     }
   ],
+
+  operationalDays: [
+    {
+      day: {
+        type: String,
+        enum: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        required: true
+      },
+      isOpen: { type: Boolean, default: false },
+      openingTime: { type: String },  
+      closingTime: { type: String }  
+    }
+  ],
+
   createdAt: { type: Date, default: Date.now }
 });
 
-mongoose.model("Turf", turfSchema);
-module.export = mongoose.model("Turf", turfschema);
+module.exports = mongoose.model("Turf", turfSchema);
