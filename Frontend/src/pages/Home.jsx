@@ -1,14 +1,41 @@
-import React, { useState } from "react";
+// src/pages/Home.jsx
+
+import React, { useState, useEffect } from "react";
 import AuthModal from "../components/AuthModal";
 
 export default function Home() {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem("userProfile");
+  });
+  const [username, setUsername] = useState("");
+  const [quote, setQuote] = useState("");
 
-//const [isLoggedIn, setIsLoggedIn] = useState(() => {
-//  const user = localStorage.getItem("userProfile");
-//  return user ? true : false;
-//});
+  const sportsQuotes = [
+     "🏸 Smash your limits, not just the shuttle!",
+    "⚽ Play hard, dream big, rest later.",
+    "🏀 Dribble, shoot, repeat.",
+    "🎾 Every day is a good day for tennis.",
+    "⚾ Home runs and hustle.",
+    "🥇 Champions train, losers complain.",
+    "🏃‍♂️ Sweat is your fat crying.",
+    "🤾‍♀️ Hustle for that muscle.",
+    "💪 No pain, no gain, just game.",
+    "🏐 Spike it till you make it!",
+    "🏆 Champions train, losers complain.",
+    "⚽ One team, one dream.",
+    "🎯 Hustle, hit, never quit.",
+    "💪 Hard work beats talent when talent doesn't work hard.",
+    "🔥 Push yourself because no one else is going to do it for you.",
+    "🚀 Your only limit is you.",
+    "🏃‍♂️ The body achieves what the mind believes."
+  ];
+
+  useEffect(() => {
+    const profile = JSON.parse(localStorage.getItem("userProfile"));
+    if (profile?.firstName) setUsername(profile.firstName);
+    setQuote(sportsQuotes[Math.floor(Math.random() * sportsQuotes.length)]);
+  }, []);
 
   const sports = [
     { name: "Badminton", img: "/images/badminton.png", link: "/catalogue" },
@@ -25,52 +52,73 @@ export default function Home() {
 
   return (
     <div className="bg-gray-900 text-white min-h-screen">
-      {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 py-4">
-        <div className="text-center mb-2">
-          <h1 className="text-4xl font-extrabold text-blue-400">SportnearMe</h1>
-        </div>
-        <nav className="flex flex-wrap justify-center gap-6 px-4 text-sm md:text-base">
-          {["Home", "Location", "About Us"].map((item) => (
-            <a
-              key={item}
-              href="#"
-              className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300 mt-2"
-            >
-              {item}
-            </a>
-          ))}
+      {/* Logo only, centered */}
+      <div className="text-center py-6">
+        <h1 className="text-4xl font-extrabold text-blue-400">SportnearMe</h1>
+      </div>
 
-          <a
-            href="/signup-host"
-            className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300 mt-2"
-          >
-            Host Your Services
-          </a>
+  <nav className="bg-gray-800 border-b border-gray-700/50 py-2 flex justify-center items-center gap-8 px-6 text-base md:text-lg whitespace-nowrap overflow-x-auto">
+      {["Home", "Location", "About Us"].map((item) => (
+    <a
+      key={item}
+      href="#"
+      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+    >
+      {item}
+    </a>
+  ))}
 
-          {isLoggedIn ? (
-            <a
-              href="/profile"
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 transition"
-            >
-              Profile
-            </a>
-          ) : (
-            <button
-              onClick={() => setAuthModalOpen(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition"
-            >
-              Login / Sign Up
-            </button>
-          )}
+  <a
+      href="/catalogue"
+      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+    >
+      Sports Catalogue
+    </a>
 
-          <AuthModal
-            isOpen={isAuthModalOpen}
-            onClose={() => setAuthModalOpen(false)}
-            setIsLoggedIn={setIsLoggedIn}
-          />
-        </nav>
-      </header>
+
+  <a
+      href="/signup-host"
+      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+    >
+      Host Your Services 
+    </a>
+
+  {isLoggedIn ? (
+    <a
+      href="/profile"
+      className="px-4 py-1 rounded-md bg-green-600 text-white text-base hover:bg-green-500 transition whitespace-nowrap"
+    >
+      Profile
+    </a>
+  ) : (
+    <button
+      onClick={() => setAuthModalOpen(true)}
+      className="px-4 py-1 rounded-md bg-blue-600 text-white text-base hover:bg-blue-500 transition whitespace-nowrap"
+    >
+      Login / Sign Up
+    </button>
+  )}
+
+  <AuthModal
+    isOpen={isAuthModalOpen}
+    onClose={() => setAuthModalOpen(false)}
+    setIsLoggedIn={setIsLoggedIn}
+  />
+</nav>
+
+
+
+       {/* Highlighted greeting and fun quote */}
+      <div className="bg-gray-900 py-4 text-center px-4">
+        {isLoggedIn && (
+          <p className="text-lg md:text-3xl font-semibold mb-2">
+             Hello, {username}!
+          </p>
+        )}
+        <p className="text-blue-100 font-semibold text-sm md:text-2xl animate-pulse">
+          {quote}
+        </p>
+      </div>
 
       {/* Content Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-2 h-[70vh] p-4">
@@ -108,31 +156,11 @@ export default function Home() {
 
       {/* Banner Carousel */}
       <section className="w-full mt-4 px-4 overflow-x-auto whitespace-nowrap space-x-4 flex">
-        <img
-          src="/images/intro.png"
-          className="inline-block rounded-lg"
-          alt="banner1"
-        />
-        <img
-          src="/images/volleyball.png"
-          className="inline-block rounded-lg"
-          alt="banner2"
-        />
-        <img
-          src="/images/badminton.png"
-          className="inline-block rounded-lg"
-          alt="banner3"
-        />
-        <img
-          src="/images/basketball.png"
-          className="inline-block rounded-lg"
-          alt="banner4"
-        />
-        <img
-          src="/images/pickleball.png"
-          className="inline-block rounded-lg"
-          alt="banner5"
-        />
+        <img src="/images/intro.png" className="inline-block rounded-lg" alt="banner1" />
+        <img src="/images/volleyball.png" className="inline-block rounded-lg" alt="banner2" />
+        <img src="/images/badminton.png" className="inline-block rounded-lg" alt="banner3" />
+        <img src="/images/basketball.png" className="inline-block rounded-lg" alt="banner4" />
+        <img src="/images/pickleball.png" className="inline-block rounded-lg" alt="banner5" />
       </section>
 
       {/* Sports Cards Grid */}
