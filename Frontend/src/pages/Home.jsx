@@ -57,62 +57,65 @@ export default function Home() {
         <h1 className="text-4xl font-extrabold text-blue-400">SportnearMe</h1>
       </div>
 
-      {/* Navigation Bar */}
-      <nav className="bg-gray-900 border-b border-gray-700 py-3 flex flex-wrap justify-center gap-10 px-4 text-sm md:text-base">
-        {["Home", "Location", "About Us"].map((item) => (
-          <a
-            key={item}
-            href="#"
-            className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-          >
-            {item}
-          </a>
-        ))}
-        <a
-          href="/catalogue"
-          className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-        >
-          Sports Catalogue
-        </a>
-        <a
-          href="/signup-host"
-          className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-        >
-          Host Your Services
-        </a>
+  <nav className="bg-gray-800 border-b border-gray-700/50 py-2 flex justify-center items-center gap-8 px-6 text-base md:text-lg whitespace-nowrap overflow-x-auto">
+      {["Home", "Location", "About Us"].map((item) => (
+    <a
+      key={item}
+      href="#"
+      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+    >
+      {item}
+    </a>
+  ))}
 
-        {isLoggedIn ? (
-          <a
-            href="/profile"
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 transition"
-          >
-            Profile
-          </a>
-        ) : (
-          <button
-            onClick={() => setAuthModalOpen(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition"
-          >
-            Login / Sign Up
-          </button>
-        )}
+  <a
+      href="/catalogue"
+      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+    >
+      Sports Catalogue
+    </a>
 
-        <AuthModal
-          isOpen={isAuthModalOpen}
-          onClose={() => setAuthModalOpen(false)}
-          setIsLoggedIn={setIsLoggedIn}
-        />
-      </nav>
+
+  <a
+      href="/signup-host"
+      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+    >
+      Host Your Services 
+    </a>
+
+  {isLoggedIn ? (
+    <a
+      href="/profile"
+      className="px-4 py-1 rounded-md bg-green-600 text-white text-base hover:bg-green-500 transition whitespace-nowrap"
+    >
+      Profile
+    </a>
+  ) : (
+    <button
+      onClick={() => setAuthModalOpen(true)}
+      className="px-4 py-1 rounded-md bg-blue-600 text-white text-base hover:bg-blue-500 transition whitespace-nowrap"
+    >
+      Login / Sign Up
+    </button>
+  )}
+
+  <AuthModal
+    isOpen={isAuthModalOpen}
+    onClose={() => setAuthModalOpen(false)}
+    setIsLoggedIn={setIsLoggedIn}
+  />
+</nav>
+
 
 
        {/* Highlighted greeting and fun quote */}
       <div className="bg-gray-900 py-4 text-center px-4">
         {isLoggedIn && (
-          <p className="text-lg md:text-xl font-semibold mb-2">
-            👋 Hello, {username}!
+          <p className="text-lg md:text-3xl font-semibold mb-2">
+             Hello, {username}!
           </p>
         )}
-        <p className="text-blue-100 font-semibold text-sm md:text-base animate-pulse">
+        <p className="text-blue-100 font-semibold text-sm md:text-2xl animate-pulse">
           {quote}
         </p>
       </div>
