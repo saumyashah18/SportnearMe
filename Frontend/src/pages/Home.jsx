@@ -5,6 +5,10 @@ export default function Home() {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+//const [isLoggedIn, setIsLoggedIn] = useState(() => {
+//  const user = localStorage.getItem("userProfile");
+//  return user ? true : false;
+//});
 
   const sports = [
     { name: "Badminton", img: "/images/badminton.png", link: "/catalogue" },
