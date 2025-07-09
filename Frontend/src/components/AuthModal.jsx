@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import sportsData from "../data/sportsData"; // Create if not already
 
+
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
