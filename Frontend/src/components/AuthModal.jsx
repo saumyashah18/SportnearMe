@@ -1,10 +1,12 @@
+// src/components/AuthModal.jsx
 import React, { useState, useRef } from "react";
-import sportsData from "../data/sportsData"; // Create if not already
+import sportsData from "../data/sportsData";
+import { useAuth } from "../Hooks/useAuth";
 
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
-  const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
+  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -13,9 +15,16 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [selectedSports, setSelectedSports] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
 
-  const handleSendOtp = () => {
+  const { sendOtp, verifyOtp, firebaseUid } = useAuth();
+
+  const handleSendOtp = async () => {
     if (/^\d{10}$/.test(phone)) {
-      setStep("otp");
+      const res = await sendOtp(phone);
+      console.log("OTP Send Response:", res);
+      if (res.success) {
+        console.log("Moving to OTP step");
+        setStep("otp");
+      }
     }
   };
 
@@ -24,13 +33,15 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     const updatedOtp = [...otpDigits];
     updatedOtp[index] = value;
     setOtpDigits(updatedOtp);
-    if (value && index < 3) inputRefs.current[index + 1]?.focus();
+    if (value && index < 5) inputRefs.current[index + 1]?.focus();
   };
 
-  const handleVerifyOtp = () => {
-    if (otpDigits.every((digit) => digit !== "")) {
-      setStep("name");
-    }
+  const handleVerifyOtp = async () => {
+    const otp = otpDigits.join("");
+    if (otp.length !== 6) return;
+    const success = await verifyOtp(otp);
+    console.log("OTP Verification Success:", success);
+    if (success) setStep("name");
   };
 
   const handleContinueName = () => {
@@ -57,26 +68,37 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     if (selectedSports.length > 0) setStep("image");
   };
 
-  const handleComplete = () => {
-    const profileData = {
-      firstName,
-      lastName,
-      gender,
-      gmail,
-      phone,
-      selectedSports,
-      profileImage: profileImage ? URL.createObjectURL(profileImage) : null,
-    };
-    localStorage.setItem("userProfile", JSON.stringify(profileData));
-    setIsLoggedIn(true);
-    onClose();
+  const handleComplete = async () => {
+    const profileData = new FormData();
+    profileData.append("firebaseUid", firebaseUid);
+    profileData.append("firstName", firstName);
+    profileData.append("lastName", lastName);
+    profileData.append("gender", gender);
+    profileData.append("gmail", gmail);
+    profileData.append("phone", phone);
+    profileData.append("selectedSports", JSON.stringify(selectedSports));
+    if (profileImage) profileData.append("profileImage", profileImage);
+    
+    const res = await fetch("http://localhost:5000/api/users", {
+  method: "POST",
+  body: profileData,
+});
+
+const data = await res.json();
+console.log("✅ User created:", data);
+
+
+    if (res.ok) {
+      setIsLoggedIn(true);
+      setStep("success");
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 backdrop-blur flex items-center justify-center">
-      <div className="bg-[#111827] text-white max-w-md w-full p-6 rounded-lg shadow-xl transition-all">
+      <div className="bg-[#111827] text-white w-full max-w-md p-6 rounded-lg shadow-xl relative">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 text-2xl hover:text-white"
@@ -84,7 +106,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           &times;
         </button>
 
-        {/* Phone Input */}
+        {/* Step: Phone */}
         {step === "phone" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-6">Get Started</h2>
@@ -113,11 +135,11 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
-        {/* OTP Verification */}
+        {/* Step: OTP */}
         {step === "otp" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Verify OTP</h2>
-            <div className="flex justify-center gap-3 mb-4">
+            <div className="flex justify-center gap-2 mb-4">
               {otpDigits.map((digit, idx) => (
                 <input
                   key={idx}
@@ -126,7 +148,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
                   value={digit}
                   onChange={(e) => handleOtpChange(idx, e.target.value)}
                   maxLength={1}
-                  className="w-12 h-12 text-center text-lg border border-gray-600 rounded bg-gray-900 focus:outline-none focus:border-blue-500"
+                  className="w-10 h-10 text-center text-lg border border-gray-600 rounded bg-gray-900 focus:outline-none focus:border-blue-500"
                 />
               ))}
             </div>
@@ -144,12 +166,11 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
-        {/* Name and Last Name */}
+        {/* Step: Name */}
         {step === "name" && (
           <>
-            <h2 className="text-center text-xl font-semibold mb-4">
-              Enter Your Name
-            </h2>
+            <h2 className="text-center text-xl font-semibold mb-4">Enter Your Details</h2>
+            <div className="flex flex-col gap-1 mb-3">
             <input
               type="text"
               placeholder="First Name"
@@ -164,6 +185,8 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
               onChange={(e) => setLastName(e.target.value)}
               className="w-full mb-3 px-3 py-2 rounded bg-gray-900 border border-gray-600 focus:outline-none"
             />
+
+            </div>
             <button
               onClick={handleContinueName}
               disabled={!firstName || !lastName}
@@ -175,15 +198,15 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             >
               Continue
             </button>
+          
           </>
         )}
 
-        {/* Gender */}
+        {/* Step: Gender */}
         {step === "gender" && (
           <>
-            <h2 className="text-center text-xl font-semibold mb-4">
-              Select Gender
-            </h2>
+          <div className="flex flex-col gap-1 mb-3">
+            <h2 className="text-center text-xl font-semibold mb-4">Select Gender</h2>
             <div className="flex justify-center gap-4 mb-4">
               {["Male", "Female", "Other"].map((g) => (
                 <button
@@ -199,6 +222,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
                 </button>
               ))}
             </div>
+            </div>
             <button
               onClick={handleContinueGender}
               disabled={!gender}
@@ -213,19 +237,20 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
-        {/* Gmail */}
+        {/* Step: Gmail */}
         {step === "gmail" && (
           <>
-            <h2 className="text-center text-xl font-semibold mb-4">
-              Enter Your Gmail
-            </h2>
+            <div className="flex flex-col gap-1 mb-3">
+            <h2 className="text-center text-xl font-semibold mb-4">Enter Your Gmail</h2>
             <input
               type="email"
               placeholder="you@gmail.com"
               value={gmail}
               onChange={(e) => setGmail(e.target.value)}
-              className="w-full mb-3 px-3 py-2 rounded bg-gray-900 border border-gray-600 focus:outline-none"
+              className="w-full mb-4 px-3 py-2 rounded bg-gray-900 border border-gray-600 focus:outline-none"
             />
+
+            </div>
             <button
               onClick={handleContinueGmail}
               disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)}
@@ -240,32 +265,33 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
-        {/* Sports Selection */}
+        {/* Step: Sports */}
         {step === "sports" && (
           <>
-            <h2 className="text-center text-xl font-semibold mb-4">
-              Select Sports You Like
-            </h2>
+            <div className="flex flex-col gap-1 mb-3"></div>
+            <h2 className="text-center text-xl font-semibold mb-4">Select Sports You Like</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+
               {sportsData.map((sport) => (
                 <div
                   key={sport.name}
-                  className={`cursor-pointer border rounded p-2 flex flex-col items-center text-xs ${
+                  onClick={() => toggleSport(sport.name)}
+                  className={`cursor-pointer border rounded p-1 flex flex-col items-center text-xs ${
                     selectedSports.includes(sport.name)
                       ? "border-blue-500 bg-blue-900"
                       : "border-gray-600"
                   }`}
-                  onClick={() => toggleSport(sport.name)}
                 >
                   <img
                     src={sport.img}
                     alt={sport.name}
-                    className="w-12 h-12 object-cover mb-1 rounded"
+                    className="w-12 h-12 object-cover rounded mb-1"
                   />
                   {sport.name}
                 </div>
               ))}
             </div>
+            
             <button
               onClick={handleContinueSports}
               disabled={selectedSports.length === 0}
@@ -280,26 +306,42 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
-        {/* Profile Image */}
+        {/* Step: Image */}
         {step === "image" && (
           <>
-            <h2 className="text-center text-xl font-semibold mb-4">
-              Upload Profile Image
-            </h2>
+            <h2 className="text-center text-xl font-semibold mb-4">Upload Profile Image</h2>
+            <div className="flex flex-col gap-1 mb-3">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setProfileImage(e.target.files[0])}
               className="w-full mb-4 text-sm text-gray-300"
             />
+            </div>
             <button
               onClick={handleComplete}
               className="w-full py-2 rounded bg-green-600 hover:bg-green-500"
             >
-              YAYY! You are all set!
+              Yay! You are all set 🎉
             </button>
           </>
         )}
+
+        {/* Success Confirmation */}
+        {step === "success" && (
+          <>
+            <h2 className="text-center text-2xl font-bold mb-4">🎉 Yay! You are all set up!</h2>
+            <p className="text-center text-gray-300 mb-4">Start exploring and booking your favourite sports now.</p>
+            <button
+              onClick={onClose}
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
+            >
+              Continue
+            </button>
+          </>
+        )}
+
+        <div id="recaptcha-container"></div>
       </div>
     </div>
   );

@@ -2,40 +2,50 @@
 
 import React, { useState, useEffect } from "react";
 import AuthModal from "../components/AuthModal";
+import LogoutMenu from "../components/LogoutMenu";
+import { useAuth } from "../Hooks/useAuth";
 
 export default function Home() {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return !!localStorage.getItem("userProfile");
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [quote, setQuote] = useState("");
+  const [showLogout, setShowLogout] = useState(false);
+
+  const { logout } = useAuth();
 
   const sportsQuotes = [
-     "🏸 Smash your limits, not just the shuttle!",
+    "🏸 Smash your limits, not just the shuttle!",
     "⚽ Play hard, dream big, rest later.",
     "🏀 Dribble, shoot, repeat.",
     "🎾 Every day is a good day for tennis.",
     "⚾ Home runs and hustle.",
     "🥇 Champions train, losers complain.",
-    "🏃‍♂️ Sweat is your fat crying.",
-    "🤾‍♀️ Hustle for that muscle.",
+    "🏃‍♂ Sweat is your fat crying.",
+    "🤾‍♀ Hustle for that muscle.",
     "💪 No pain, no gain, just game.",
     "🏐 Spike it till you make it!",
-    "🏆 Champions train, losers complain.",
     "⚽ One team, one dream.",
     "🎯 Hustle, hit, never quit.",
-    "💪 Hard work beats talent when talent doesn't work hard.",
     "🔥 Push yourself because no one else is going to do it for you.",
     "🚀 Your only limit is you.",
-    "🏃‍♂️ The body achieves what the mind believes."
+    "🏃‍♂ The body achieves what the mind believes."
   ];
 
   useEffect(() => {
-    const profile = JSON.parse(localStorage.getItem("userProfile"));
-    if (profile?.firstName) setUsername(profile.firstName);
     setQuote(sportsQuotes[Math.floor(Math.random() * sportsQuotes.length)]);
   }, []);
+
+  const handleProfileClick = () => {
+    setShowLogout(!showLogout);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setIsLoggedIn(false);
+    setUsername("");
+    setShowLogout(false);
+  };
 
   const sports = [
     { name: "Badminton", img: "/images/badminton.png", link: "/catalogue" },
@@ -52,72 +62,63 @@ export default function Home() {
 
   return (
     <div className="bg-gray-900 text-white min-h-screen">
-      {/* Logo only, centered */}
+      {/* Centered Logo */}
       <div className="text-center py-6">
         <h1 className="text-4xl font-extrabold text-blue-400">SportnearMe</h1>
       </div>
 
-  <nav className="bg-gray-800 border-b border-gray-700/50 py-2 flex justify-center items-center gap-8 px-6 text-base md:text-lg whitespace-nowrap overflow-x-auto">
-      {["Home", "Location", "About Us"].map((item) => (
-    <a
-      key={item}
-      href="#"
-      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-    >
-      {item}
-    </a>
-  ))}
+      
 
-  <a
-      href="/catalogue"
-      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-    >
-      Sports Catalogue
-    </a>
+      {/* Navigation Bar */}
+      <nav className="bg-gray-800 border-b border-gray-700/50 py-2 flex justify-center items-center gap-8 px-6 text-lg md:text-xl whitespace-nowrap overflow-x-auto">
+        {["Home", "Location", "About Us", "Sports Catalogue", "Host Your Services"].map((item) => (
+          <a
+            key={item}
+            href="#"
+            className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+          >
+            {item}
+          </a>
+        ))}
 
+        {isLoggedIn ? (
+          <button
+            onClick={handleProfileClick}
+            className="px-4 py-1 rounded bg-green-600 text-white text-lg hover:bg-green-500 transition whitespace-nowrap"
+          >
+            Profile
+          </button>
+        ) : (
+          <button
+            onClick={() => setAuthModalOpen(true)}
+            className="px-4 py-1 rounded bg-blue-600 text-white text-lg hover:bg-blue-500 transition whitespace-nowrap"
+          >
+            Login / Sign Up
+          </button>
+        )}
+      </nav>
 
-  <a
-      href="/signup-host"
-      className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-    >
-      Host Your Services 
-    </a>
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        setIsLoggedIn={setIsLoggedIn}
+        setUsername={setUsername}
+      />
 
-  {isLoggedIn ? (
-    <a
-      href="/profile"
-      className="px-4 py-1 rounded-md bg-green-600 text-white text-base hover:bg-green-500 transition whitespace-nowrap"
-    >
-      Profile
-    </a>
-  ) : (
-    <button
-      onClick={() => setAuthModalOpen(true)}
-      className="px-4 py-1 rounded-md bg-blue-600 text-white text-base hover:bg-blue-500 transition whitespace-nowrap"
-    >
-      Login / Sign Up
-    </button>
-  )}
+      {/* Logout Menu */}
+      {showLogout && isLoggedIn && (
+        <LogoutMenu onLogout={handleLogout} />
+      )}
 
-  <AuthModal
-    isOpen={isAuthModalOpen}
-    onClose={() => setAuthModalOpen(false)}
-    setIsLoggedIn={setIsLoggedIn}
-  />
-</nav>
-
-
-
-       {/* Highlighted greeting and fun quote */}
+      {/* Highlighted Quote */}
       <div className="bg-gray-900 py-4 text-center px-4">
         {isLoggedIn && (
           <p className="text-lg md:text-3xl font-semibold mb-2">
-             Hello, {username}!
+            Hello, {username }!
           </p>
         )}
-        <p className="text-blue-100 font-semibold text-sm md:text-2xl animate-pulse">
-          {quote}
-        </p>
+        <p className="text-blue-100 font-semibold text-sm md:text-2xl animate-pulse">{quote}</p>
       </div>
 
       {/* Content Grid */}
