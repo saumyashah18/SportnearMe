@@ -70,8 +70,8 @@ export default function Home() {
       
 
       {/* Navigation Bar */}
-      <nav className="bg-gray-800 border-b border-gray-700/50 py-2 flex justify-center items-center gap-8 px-6 text-lg md:text-xl whitespace-nowrap overflow-x-auto">
-        {["Home", "Location", "About Us", "Sports Catalogue", "Host Your Services"].map((item) => (
+      <nav className="bg-gray-800 border-b border-gray-700/50 py-2 flex justify-center items-center gap-6 px-6 text-lg md:text-xl whitespace-nowrap overflow-x-auto">
+        {["Home", "Location", "About Us"].map((item) => (
           <a
             key={item}
             href="#"
@@ -80,6 +80,20 @@ export default function Home() {
             {item}
           </a>
         ))}
+
+        <a
+            href="/catalogue"
+            className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+          >
+            Sports Catalogue
+          </a>
+
+        <a
+            href="/signup-host"
+            className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+          >
+            Host Your Services
+          </a>
 
         {isLoggedIn ? (
           <button

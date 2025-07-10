@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 
 export default function DashboardHost() {
   const [sports, setSports] = useState([
     {
       sport: "",
-      price: "",
       courts: "",
-      slots: [""],
+      startTime: "",
+      endTime: "",
+      minSlotDuration: "",
+      advanceAmount: "",
       images: [],
     },
   ]);
@@ -19,21 +20,9 @@ export default function DashboardHost() {
     setSports(updatedSports);
   };
 
-  const handleSlotChange = (sportIndex, slotIndex, value) => {
+  const handleImageChange = (index, files) => {
     const updatedSports = [...sports];
-    updatedSports[sportIndex].slots[slotIndex] = value;
-    setSports(updatedSports);
-  };
-
-  const addSlot = (sportIndex) => {
-    const updatedSports = [...sports];
-    updatedSports[sportIndex].slots.push("");
-    setSports(updatedSports);
-  };
-
-  const removeSlot = (sportIndex, slotIndex) => {
-    const updatedSports = [...sports];
-    updatedSports[sportIndex].slots.splice(slotIndex, 1);
+    updatedSports[index].images = Array.from(files);
     setSports(updatedSports);
   };
 
@@ -42,9 +31,11 @@ export default function DashboardHost() {
       ...sports,
       {
         sport: "",
-        price: "",
         courts: "",
-        slots: [""],
+        startTime: "",
+        endTime: "",
+        minSlotDuration: "",
+        advanceAmount: "",
         images: [],
       },
     ]);
@@ -55,12 +46,6 @@ export default function DashboardHost() {
     setSports(updatedSports);
   };
 
-  const handleImageChange = (index, files) => {
-    const updatedSports = [...sports];
-    updatedSports[index].images = Array.from(files);
-    setSports(updatedSports);
-  };
-  
   const navigate = useNavigate();
   const handlePublish = () => {
     const groundData = {
@@ -71,20 +56,15 @@ export default function DashboardHost() {
     };
 
     console.log("Ground Data to be published:", groundData);
-    // You can replace this with navigation to your turf page
-
-    // Optionally store in localStorage or send to server here
-  // localStorage.setItem("hostGroundData", JSON.stringify(groundData));
-
     navigate("/turfownerdashboard");
   };
 
   return (
     <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] flex items-center justify-center min-h-screen text-white px-4 py-8">
       <div className="bg-white p-6 rounded-2xl shadow-md w-full max-w-5xl text-gray-800">
-        <h1 className="text-xl font-bold mb-4">Set Up Your Turf Profile</h1>
-
-        {/* Basic Info */}
+        <h1 className="text-xl text-center font-bold mb-4">Set Up Your Turf Profile</h1>
+{/* 
+        Basic Info
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <input
             type="text"
@@ -105,17 +85,17 @@ export default function DashboardHost() {
             className="border p-2 rounded"
           />
           <input type="file" className="border p-2 rounded bg-gray-50" />
-        </div>
+        </div> */}
 
-        {/* Sports Setup */}
         <h3 className="text-lg font-semibold mt-4 mb-2">Add Sports Offered</h3>
 
         <div className="space-y-6">
           {sports.map((sport, index) => (
             <div
               key={index}
-              className="grid grid-cols-1 md:grid-cols-5 gap-4 relative p-2 border rounded"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 border rounded p-4 relative bg-gray-50"
             >
+              {/* Select Sport */}
               <select
                 value={sport.sport}
                 onChange={(e) =>
@@ -123,9 +103,7 @@ export default function DashboardHost() {
                 }
                 className="border p-2 rounded"
               >
-                <option disabled value="">
-                  Select Sport
-                </option>
+                <option value="">Select Sport</option>
                 <option>Badminton</option>
                 <option>Pickleball</option>
                 <option>Cricket</option>
@@ -133,16 +111,7 @@ export default function DashboardHost() {
                 <option>Football</option>
               </select>
 
-              <input
-                type="text"
-                placeholder="Price (₹/hour)"
-                value={sport.price}
-                onChange={(e) =>
-                  handleInputChange(index, "price", e.target.value)
-                }
-                className="border p-2 rounded"
-              />
-
+              {/* No. of Courts */}
               <input
                 type="number"
                 placeholder="No. of Courts/Turfs"
@@ -153,57 +122,75 @@ export default function DashboardHost() {
                 className="border p-2 rounded"
               />
 
-              <div className="col-span-2 space-y-2">
-                <label className="block text-sm font-semibold">
-                  Available Time Slots
-                </label>
-                {sport.slots.map((slot, slotIndex) => (
-                  <div key={slotIndex} className="flex gap-2 items-center">
-                    <input
-                      type="text"
-                      placeholder="e.g. 6:00 AM"
-                      value={slot}
-                      onChange={(e) =>
-                        handleSlotChange(index, slotIndex, e.target.value)
-                      }
-                      className="border p-2 rounded w-full md:w-40"
-                    />
-                    {sport.slots.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeSlot(index, slotIndex)}
-                        className="text-red-500 text-sm hover:underline"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => addSlot(index)}
-                  className="text-sm text-blue-500 hover:text-blue-400 underline"
-                >
-                  + Add Another Slot
-                </button>
+              {/* Working Hours */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <input
+                  type="time"
+                  placeholder="Start Time"
+                  value={sport.startTime}
+                  onChange={(e) =>
+                    handleInputChange(index, "startTime", e.target.value)
+                  }
+                  className="border p-2 rounded flex-1"
+                />
+                <input
+                  type="time"
+                  placeholder="End Time"
+                  value={sport.endTime}
+                  onChange={(e) =>
+                    handleInputChange(index, "endTime", e.target.value)
+                  }
+                  className="border p-2 rounded flex-1"
+                />
+              </div>
 
-                <label className="block text-sm font-semibold mt-4">
-                  Upload Image of Court/Ground
+              {/* Minimum Slot Duration */}
+              <select
+                value={sport.minSlotDuration}
+                onChange={(e) =>
+                  handleInputChange(index, "minSlotDuration", e.target.value)
+                }
+                className="border p-2 rounded"
+              >
+                <option value="">Select Min Slot Duration</option>
+                <option value="30">30 Minutes</option>
+                <option value="45">45 Minutes</option>
+                <option value="60">1 Hour</option>
+                <option value="90">1.5 Hours</option>
+                <option value="120">2 Hours</option>
+              </select>
+
+              {/* Advance Payable */}
+              <input
+                type="number"
+                placeholder="Advance Payable Amount (₹)"
+                value={sport.advanceAmount}
+                onChange={(e) =>
+                  handleInputChange(index, "advanceAmount", e.target.value)
+                }
+                className="border p-2 rounded"
+              />
+
+              {/* Image Upload */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold mb-1">
+                  Upload Images of Court/Ground
                 </label>
                 <input
                   type="file"
                   multiple
                   accept="image/*"
                   onChange={(e) => handleImageChange(index, e.target.files)}
-                  className="border p-2 rounded w-full bg-gray-50"
+                  className="border p-2 rounded bg-gray-50 w-full"
                 />
               </div>
 
+              {/* Remove Button */}
               {sports.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeSportRow(index)}
-                  className="absolute top-0 right-0 text-red-500 text-sm hover:underline"
+                  className="absolute top-2 right-2 text-red-500 hover:underline text-sm"
                 >
                   Remove
                 </button>
@@ -212,18 +199,18 @@ export default function DashboardHost() {
           ))}
         </div>
 
-        {/* Add More */}
+        {/* Add Another Sport */}
         <div className="mt-4">
           <button
             type="button"
             onClick={addSportRow}
-            className="text-sm text-blue-500 hover:text-blue-400 underline"
+            className="text-blue-500 hover:underline text-sm"
           >
             + Add Another Sport
           </button>
         </div>
 
-        {/* Submit */}
+        {/* Publish Button */}
         <div className="text-right mt-6">
           <button
             onClick={handlePublish}
