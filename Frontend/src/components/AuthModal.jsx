@@ -80,7 +80,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     profileData.append("selectedSports", JSON.stringify(selectedSports));
     if (profileImage) profileData.append("profileImage", profileImage);
     
-    const res = await fetch("http://localhost:5000/api/users", {
+    const res = await fetch("http://localhost:5001/api/users", {
   method: "POST",
   body: profileData,
 });
