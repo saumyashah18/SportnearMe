@@ -2,7 +2,7 @@
 import React, { useState, useRef } from "react";
 import sportsData from "../data/sportsData";
 import { useAuth } from "../Hooks/useAuth";
-
+import { useNavigate } from "react-router-dom";
 
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [step, setStep] = useState("phone");
@@ -17,13 +17,12 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [profileImage, setProfileImage] = useState(null);
 
   const { sendOtp, verifyOtp, firebaseUid } = useAuth();
+  const navigate = useNavigate();
 
   const handleSendOtp = async () => {
     if (/^\d{10}$/.test(phone)) {
       const res = await sendOtp(phone);
-      console.log("OTP Send Response:", res);
       if (res.success) {
-        console.log("Moving to OTP step");
         setStep("otp");
       }
     }
@@ -40,21 +39,63 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const handleVerifyOtp = async () => {
     const otp = otpDigits.join("");
     if (otp.length !== 6) return;
+
     const success = await verifyOtp(otp);
-    console.log("OTP Verification Success:", success);
-    if (success) setStep("name");
+    if (!success) return;
+
+    // 🔷 After Firebase OTP → check backend
+    const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ firebaseUid, phone }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
+    }
+
+    // Save JWT
+    localStorage.setItem("token", data.token);
+
+    if (data.needsProfile) {
+      setStep("name"); // new user → collect profile
+    } else {
+      setIsLoggedIn(true);
+      setStep("success"); // existing user
+    }
   };
 
-  const handleContinueName = () => {
-    if (firstName && lastName) setStep("gender");
-  };
+  const handleCompleteProfile = async () => {
+    const formData = new FormData();
+    formData.append("firebaseUid", firebaseUid);
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("gender", gender);
+    formData.append("gmail", gmail);
+    formData.append("phone", phone);
+    formData.append("selectedSports", JSON.stringify(selectedSports));
+    if (profileImage) formData.append("profileImage", profileImage);
 
-  const handleContinueGender = () => {
-    if (gender) setStep("gmail");
-  };
+    const token = localStorage.getItem("token");
 
-  const handleContinueGmail = () => {
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)) setStep("sports");
+    const res = await fetch("http://localhost:5001/api/users/completeProfile", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Profile completion failed");
+      return;
+    }
+
+    setIsLoggedIn(true);
+    setStep("success");
   };
 
   const toggleSport = (sport) => {
@@ -63,36 +104,6 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
         ? prev.filter((s) => s !== sport)
         : [...prev, sport]
     );
-  };
-
-  const handleContinueSports = () => {
-    if (selectedSports.length > 0) setStep("image");
-  };
-
-  const handleComplete = async () => {
-    const profileData = new FormData();
-    profileData.append("firebaseUid", firebaseUid);
-    profileData.append("firstName", firstName);
-    profileData.append("lastName", lastName);
-    profileData.append("gender", gender);
-    profileData.append("gmail", gmail);
-    profileData.append("phone", phone);
-    profileData.append("selectedSports", JSON.stringify(selectedSports));
-    if (profileImage) profileData.append("profileImage", profileImage);
-    
-    const res = await fetch("http://localhost:5001/api/users", {
-  method: "POST",
-  body: profileData,
-});
-
-const data = await res.json();
-console.log("✅ User created:", data);
-
-
-    if (res.ok) {
-      setIsLoggedIn(true);
-      setStep("success");
-    }
   };
 
   if (!isOpen) return null;
@@ -107,7 +118,7 @@ console.log("✅ User created:", data);
           &times;
         </button>
 
-        {/* Step: Phone */}
+        {/* Phone */}
         {step === "phone" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-6">Get Started</h2>
@@ -136,7 +147,7 @@ console.log("✅ User created:", data);
           </>
         )}
 
-        {/* Step: OTP */}
+        {/* OTP */}
         {step === "otp" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Verify OTP</h2>
@@ -167,11 +178,10 @@ console.log("✅ User created:", data);
           </>
         )}
 
-        {/* Step: Name */}
+        {/* Profile steps only if needed */}
         {step === "name" && (
           <>
-            <h2 className="text-center text-xl font-semibold mb-4">Enter Your Details</h2>
-            <div className="flex flex-col gap-1 mb-3">
+            <h2 className="text-center text-xl font-semibold mb-4">Enter Your Name</h2>
             <input
               type="text"
               placeholder="First Name"
@@ -186,27 +196,18 @@ console.log("✅ User created:", data);
               onChange={(e) => setLastName(e.target.value)}
               className="w-full mb-3 px-3 py-2 rounded bg-gray-900 border border-gray-600 focus:outline-none"
             />
-
-            </div>
             <button
-              onClick={handleContinueName}
+              onClick={() => setStep("gender")}
               disabled={!firstName || !lastName}
-              className={`w-full py-2 rounded ${
-                firstName && lastName
-                  ? "bg-blue-600 hover:bg-blue-500"
-                  : "bg-gray-600 cursor-not-allowed"
-              }`}
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
             >
               Continue
             </button>
-          
           </>
         )}
 
-        {/* Step: Gender */}
         {step === "gender" && (
           <>
-          <div className="flex flex-col gap-1 mb-3">
             <h2 className="text-center text-xl font-semibold mb-4">Select Gender</h2>
             <div className="flex justify-center gap-4 mb-4">
               {["Male", "Female", "Other"].map((g) => (
@@ -223,26 +224,19 @@ console.log("✅ User created:", data);
                 </button>
               ))}
             </div>
-            </div>
             <button
-              onClick={handleContinueGender}
+              onClick={() => setStep("gmail")}
               disabled={!gender}
-              className={`w-full py-2 rounded ${
-                gender
-                  ? "bg-blue-600 hover:bg-blue-500"
-                  : "bg-gray-600 cursor-not-allowed"
-              }`}
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
             >
               Continue
             </button>
           </>
         )}
 
-        {/* Step: Gmail */}
         {step === "gmail" && (
           <>
-            <div className="flex flex-col gap-1 mb-3">
-            <h2 className="text-center text-xl font-semibold mb-4">Enter Your Gmail</h2>
+            <h2 className="text-center text-xl font-semibold mb-4">Enter Gmail</h2>
             <input
               type="email"
               placeholder="you@gmail.com"
@@ -250,29 +244,20 @@ console.log("✅ User created:", data);
               onChange={(e) => setGmail(e.target.value)}
               className="w-full mb-4 px-3 py-2 rounded bg-gray-900 border border-gray-600 focus:outline-none"
             />
-
-            </div>
             <button
-              onClick={handleContinueGmail}
+              onClick={() => setStep("sports")}
               disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)}
-              className={`w-full py-2 rounded ${
-                /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)
-                  ? "bg-blue-600 hover:bg-blue-500"
-                  : "bg-gray-600 cursor-not-allowed"
-              }`}
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
             >
               Continue
             </button>
           </>
         )}
 
-        {/* Step: Sports */}
         {step === "sports" && (
           <>
-            <div className="flex flex-col gap-1 mb-3"></div>
-            <h2 className="text-center text-xl font-semibold mb-4">Select Sports You Like</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
-
+            <h2 className="text-center text-xl font-semibold mb-4">Pick Your Sports</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {sportsData.map((sport) => (
                 <div
                   key={sport.name}
@@ -283,58 +268,48 @@ console.log("✅ User created:", data);
                       : "border-gray-600"
                   }`}
                 >
-                  <img
-                    src={sport.img}
-                    alt={sport.name}
-                    className="w-12 h-12 object-cover rounded mb-1"
-                  />
+                  <img src={sport.img} alt={sport.name} className="w-12 h-12 object-cover mb-1" />
                   {sport.name}
                 </div>
               ))}
             </div>
-            
             <button
-              onClick={handleContinueSports}
+              onClick={() => setStep("image")}
               disabled={selectedSports.length === 0}
-              className={`w-full py-2 rounded ${
-                selectedSports.length
-                  ? "bg-blue-600 hover:bg-blue-500"
-                  : "bg-gray-600 cursor-not-allowed"
-              }`}
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 mt-4"
             >
               Continue
             </button>
           </>
         )}
 
-        {/* Step: Image */}
         {step === "image" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Upload Profile Image</h2>
-            <div className="flex flex-col gap-1 mb-3">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setProfileImage(e.target.files[0])}
               className="w-full mb-4 text-sm text-gray-300"
             />
-            </div>
             <button
-              onClick={handleComplete}
+              onClick={handleCompleteProfile}
               className="w-full py-2 rounded bg-green-600 hover:bg-green-500"
             >
-              Yay! You are all set 🎉
+              Complete Setup
             </button>
           </>
         )}
 
-        {/* Success Confirmation */}
         {step === "success" && (
           <>
-            <h2 className="text-center text-2xl font-bold mb-4">🎉 Yay! You are all set up!</h2>
-            <p className="text-center text-gray-300 mb-4">Start exploring and booking your favourite sports now.</p>
+            <h2 className="text-center text-2xl font-bold mb-4">🎉 All Set!</h2>
+            <p className="text-center text-gray-300 mb-4">Enjoy using SportNearMe!</p>
             <button
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+                navigate("/home");
+              }}
               className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
             >
               Continue
