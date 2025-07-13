@@ -1,12 +1,12 @@
 const express = require("express");
 const multer = require("multer");
 const User = require("../models/User");
-const { generateToken } = require("../middleware/auth");
+const { generateToken, verifyToken } = require("../middleware/auth");
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" }); // Later: cloud storage
+const upload = multer({ dest: "uploads/" }); 
 
-// 📌 Login or Register
+// 🔷 loginOrRegister
 router.post("/loginOrRegister", async (req, res) => {
   const { firebaseUid, phone } = req.body;
 
@@ -42,10 +42,9 @@ router.post("/loginOrRegister", async (req, res) => {
   }
 });
 
-// 📌 Complete profile (after landing on profile page)
-router.post("/completeProfile", upload.single("profileImage"), async (req, res) => {
+// 🔷 completeProfile
+router.post("/completeProfile", verifyToken, upload.single("profileImage"), async (req, res) => {
   const {
-    firebaseUid,
     firstName,
     lastName,
     gender,
@@ -54,7 +53,7 @@ router.post("/completeProfile", upload.single("profileImage"), async (req, res) 
   } = req.body;
 
   try {
-    const user = await User.findOne({ firebaseUid });
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

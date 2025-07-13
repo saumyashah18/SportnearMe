@@ -23,5 +23,7 @@ app.get("/", (req, res) => {
   res.send("SportNearMe backend running successfully!");
 });
 
+app.use("/api/users", require("./Routes/UserRoute"));
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
