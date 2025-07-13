@@ -15,8 +15,8 @@ const turfSchema = new mongoose.Schema({
   sports: [
     {
       name: { type: String, required: true },
-      fromTime: { type: String },   // e.g., "08:00 AM"
-      toTime: { type: String },     // e.g., "10:00 PM"
+      fromTime: { type: String },   
+      toTime: { type: String },
       pricing: {
         '30min': Number,
         '45min': Number,

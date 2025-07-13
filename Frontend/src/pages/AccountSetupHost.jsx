@@ -30,10 +30,10 @@ const AccountSetupHost = () => {
         {/* Step Indicators */}
         <div className="flex justify-between text-sm font-semibold border-b border-slate-600 pb-2 mb-4">
           <button onClick={() => setStep(1)} className={step === 1 ? "text-blue-400" : "text-slate-500"}>
-            1. Academy Credentials
+            1. Turf-Owner information
           </button>
           <button onClick={() => setStep(2)} className={step === 2 ? "text-blue-400" : "text-slate-500"}>
-            2. Bank Information
+            2. Turf information
           </button>
           <button onClick={() => setStep(3)} className={step === 3 ? "text-blue-400" : "text-slate-500"}>
             3. Finish Setup
@@ -42,13 +42,12 @@ const AccountSetupHost = () => {
 
         {step === 1 && (
           <div>
-            <h3 className="text-lg font-semibold mb-2">Academy Information</h3>
+            <h3 className="text-lg font-semibold mb-2"></h3>
             <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <input type="text" placeholder="Academy Name" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-              <input type="text" placeholder="Owner Full Name" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-              <input type="text" placeholder="PAN Number" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-              <input type="text" placeholder="Phone Number" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
+              <input type="text" placeholder="Owner's Full Name" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
+              <input type="date" placeholder="Date Of Birth" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
               <input type="email" placeholder="Email" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
+              <input type="text" placeholder="Gender" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
             </div>
             <button onClick={() => setStep(2)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
               Next
@@ -58,22 +57,15 @@ const AccountSetupHost = () => {
 
         {step === 2 && (
           <div>
-            <h3 className="text-lg font-semibold mb-2">Bank & KYC</h3>
+            <h3 className="text-lg font-semibold mb-2"></h3>
             <div className="grid md:grid-cols-2 gap-4 mb-4">
-              <input type="text" placeholder="Beneficiary Name" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-              <input type="text" placeholder="Bank Name" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-              <input type="text" placeholder="Account Number" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-              <input type="text" placeholder="IFSC Code" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-            </div>
+              <input type="text" placeholder="Turf Name" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
+              <input type="text" placeholder="Turf Address" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
 
-            <div className="mb-4">
-              <label className="block mb-1 text-sm font-medium text-slate-300">Upload Academy Logo / Profile Image</label>
-              <input type="file" className="bg-transparent border border-slate-600 rounded w-full p-2 text-white file:text-white file:bg-blue-600" />
-            </div>
-
-            <div className="mb-4">
-              <label className="block mb-1 text-sm font-medium text-slate-300">Upload GST Certificate / KYC</label>
-              <input type="file" className="bg-transparent border border-slate-600 rounded w-full p-2 text-white file:text-white file:bg-blue-600" />
+          </div>
+            <div className= "grid h-14 gap-4 mb-15" >
+              <input type="text" placeholder="Turf Description" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
+              <input type="link" placeholder="Turf Location URL" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
             </div>
 
             <button onClick={() => setStep(1)} className="text-sm underline mr-4 text-blue-400">
