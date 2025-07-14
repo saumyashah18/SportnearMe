@@ -121,7 +121,7 @@ const handleVerifyOtp = async () => {
         {/* Phone */}
         {step === "phone" && (
           <>
-            <h2 className="text-center text-xl font-semibold mb-6">Get Started</h2>
+            <h2 className="text-center text-xl cursor-pointer font-semibold mb-6">Get Started</h2>
             <div className="border border-gray-600 px-3 py-2 rounded flex items-center gap-2 bg-gray-900">
               🇮🇳 +91
               <input
@@ -284,22 +284,61 @@ const handleVerifyOtp = async () => {
         )}
 
         {step === "image" && (
-          <>
-            <h2 className="text-center text-xl font-semibold mb-4">Upload Profile Image</h2>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setProfileImage(e.target.files[0])}
-              className="w-full mb-4 text-sm text-gray-300"
-            />
-            <button
-              onClick={handleCompleteProfile}
-              className="w-full py-2 rounded bg-green-600 hover:bg-green-500"
-            >
-              Complete Setup
-            </button>
-          </>
-        )}
+  <>
+    <h2 className="text-center text-2xl font-bold mb-2">Let&apos;s set up your profile picture</h2>
+
+    {/* Circular Camera Upload */}
+    <div className="flex justify-center mb-4">
+      <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setProfileImage(e.target.files[0])}
+          className="hidden"
+        />
+      </label>
+    </div>
+
+    <p className="text-center text-gray-400 mb-4">or choose your avatar</p>
+
+    {/* Preset Avatars */}
+    <div className="flex justify-center gap-3 overflow-x-auto mb-6">
+      {[
+        "/avatars/avatar1.png",
+        "/avatars/avatar2.png",
+        "/avatars/avatar3.png",
+        "/avatars/avatar4.png",
+        "/avatars/avatar5.png"
+      ].map((src, idx) => (
+        <img
+          key={idx}
+          src={src}
+          alt={`Avatar ${idx + 1}`}
+          onClick={() => setProfileImage(src)}
+          className={`w-14 h-14 rounded-full cursor-pointer border-2 ${
+            profileImage === src ? "border-blue-500" : "border-transparent"
+          }`}
+        />
+      ))}
+    </div>
+
+    <button
+      onClick={handleCompleteProfile}
+      disabled={!profileImage}
+      className={`w-full py-2 rounded ${
+        profileImage
+          ? "bg-blue-600 hover:bg-blue-500"
+          : "bg-gray-600 cursor-not-allowed"
+      }`}
+    >
+      Continue
+    </button>
+  </>
+)}
+
 
         {step === "success" && (
           <>

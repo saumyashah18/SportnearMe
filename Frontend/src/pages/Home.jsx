@@ -105,7 +105,7 @@ export default function Home() {
         ) : (
           <button
             onClick={() => setAuthModalOpen(true)}
-            className="px-4 py-1 rounded bg-blue-600 text-white text-lg hover:bg-blue-500 transition whitespace-nowrap"
+            className="px-4 py-1 rounded cursor-pointer bg-blue-600 text-white text-lg hover:bg-blue-500 transition whitespace-nowrap"
           >
             Login / Sign Up
           </button>
@@ -129,7 +129,7 @@ export default function Home() {
       <div className="bg-gray-900 py-4 text-center px-4">
         {isLoggedIn && (
           <p className="text-lg md:text-3xl font-semibold mb-2">
-            Hello, {username }!
+            Hello, {username.name }!
           </p>
         )}
         <p className="text-blue-100 font-semibold text-sm md:text-2xl animate-pulse">{quote}</p>
