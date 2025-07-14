@@ -308,7 +308,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={() => {
                 onClose();
-                navigate("/home");
+                navigate("/");
               }}
               className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
             >
