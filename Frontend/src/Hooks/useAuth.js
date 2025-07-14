@@ -37,17 +37,18 @@ export function useAuth() {
     }
   };
 
-  const verifyOtp = async (otp) => {
-    try {
-      const result = await confirmationResult.confirm(otp);
-      setFirebaseUid(result.user.uid);
-      console.log("OTP verified successfully. Firebase UID:", result.user.uid);
-      return true;
-    } catch (err) {
-      console.error("verifyOtp error:", err);
-      return false;
-    }
-  };
+const verifyOtp = async (otp) => {
+  try {
+    const result = await confirmationResult.confirm(otp);
+    setFirebaseUid(result.user.uid);
+    console.log("✅ OTP verified:", result.user.uid);
+    return result.user.uid; // return it explicitly
+  } catch (err) {
+    console.error("❌ OTP verification failed:", err);
+    return null;
+  }
+};
+
 
   const logout = async () => {
     await signOut(auth);

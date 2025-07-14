@@ -34,39 +34,39 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     updatedOtp[index] = value;
     setOtpDigits(updatedOtp);
     if (value && index < 5) inputRefs.current[index + 1]?.focus();
-  };
+};
 
-  const handleVerifyOtp = async () => {
-    const otp = otpDigits.join("");
-    if (otp.length !== 6) return;
+const handleVerifyOtp = async () => {
+  const otp = otpDigits.join("");
+  const uid = await verifyOtp(otp);
+  if (!uid) {
+    alert("OTP verification failed.");
+    return;
+  }
 
-    const success = await verifyOtp(otp);
-    if (!success) return;
+  const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ firebaseUid: uid, phone }),
+  });
 
-    // 🔷 After Firebase OTP → check backend
-    const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ firebaseUid, phone }),
-    });
+  const data = await res.json();
 
-    const data = await res.json();
+  if (!res.ok) {
+    alert(data.message || "Login failed");
+    return;
+  }
 
-    if (!res.ok) {
-      alert(data.message || "Login failed");
-      return;
-    }
+  // Save JWT
+  localStorage.setItem("token", data.token);
 
-    // Save JWT
-    localStorage.setItem("token", data.token);
-
-    if (data.needsProfile) {
-      setStep("name"); // new user → collect profile
-    } else {
-      setIsLoggedIn(true);
-      setStep("success"); // existing user
-    }
-  };
+  if (data.needsProfile) {
+    setStep("name"); // new user → collect profile
+  } else {
+    setIsLoggedIn(true);
+    setStep("success"); // existing user
+  }
+};
 
   const handleCompleteProfile = async () => {
     const formData = new FormData();
