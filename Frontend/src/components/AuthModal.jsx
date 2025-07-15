@@ -93,6 +93,19 @@ const handleVerifyOtp = async () => {
       alert(data.message || "Profile completion failed");
       return;
     }
+    // ✅ Save user profile data to localStorage
+localStorage.setItem("user", JSON.stringify({
+  firstName,
+  lastName,
+  gender,
+  gmail,
+  phone,
+  selectedSports,
+  image: typeof profileImage === "string" ? profileImage : null, // only if selected from preset
+}));
+
+setIsLoggedIn(true);
+setStep("success");
 
     setIsLoggedIn(true);
     setStep("success");
