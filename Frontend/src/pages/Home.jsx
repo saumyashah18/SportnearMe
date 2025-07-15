@@ -1,9 +1,10 @@
-// src/pages/Home.jsx
+""// src/pages/Home.jsx
 
 import React, { useState, useEffect } from "react";
 import AuthModal from "../components/AuthModal";
-import LogoutMenu from "../components/LogoutMenu";
 import { useAuth } from "../Hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import Profile from "./profile";
 
 export default function Home() {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
@@ -11,37 +12,45 @@ export default function Home() {
   const [username, setUsername] = useState("");
   const [quote, setQuote] = useState("");
   const [showLogout, setShowLogout] = useState(false);
+  const navigate = useNavigate();
 
   const { logout } = useAuth();
 
   const sportsQuotes = [
-    "🏸 Smash your limits, not just the shuttle!",
-    "⚽ Play hard, dream big, rest later.",
-    "🏀 Dribble, shoot, repeat.",
-    "🎾 Every day is a good day for tennis.",
-    "⚾ Home runs and hustle.",
-    "🥇 Champions train, losers complain.",
-    "🏃‍♂ Sweat is your fat crying.",
-    "🤾‍♀ Hustle for that muscle.",
-    "💪 No pain, no gain, just game.",
-    "🏐 Spike it till you make it!",
-    "⚽ One team, one dream.",
-    "🎯 Hustle, hit, never quit.",
-    "🔥 Push yourself because no one else is going to do it for you.",
-    "🚀 Your only limit is you.",
-    "🏃‍♂ The body achieves what the mind believes."
+    "\ud83c\udfbd Smash your limits, not just the shuttle!",
+    "\u26bd Play hard, dream big, rest later.",
+    "\ud83c\udfc0 Dribble, shoot, repeat.",
+    "\ud83c\udfbe Every day is a good day for tennis.",
+    "\u26be Home runs and hustle.",
+    "\ud83e\udd47 Champions train, losers complain.",
+    "\ud83c\udfc3\u200d\u2642\ufe0f Sweat is your fat crying.",
+    "\ud83e\uddfe\u200d\u2642\ufe0f Hustle for that muscle.",
+    "\ud83d\udcaa No pain, no gain, just game.",
+    "\ud83c\udfd0 Spike it till you make it!",
+    "\u26bd One team, one dream.",
+    "\ud83c\udfaf Hustle, hit, never quit.",
+    "\ud83d\udd25 Push yourself because no one else is going to do it for you.",
+    "\ud83d\ude80 Your only limit is you.",
+    "\ud83c\udfc3\u200d\u2642\ufe0f The body achieves what the mind believes."
   ];
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setIsLoggedIn(true);
+      setUsername(user);
+    }
     setQuote(sportsQuotes[Math.floor(Math.random() * sportsQuotes.length)]);
   }, []);
 
   const handleProfileClick = () => {
-    setShowLogout(!showLogout);
+    navigate("/profile");
   };
 
   const handleLogout = async () => {
     await logout();
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setIsLoggedIn(false);
     setUsername("");
     setShowLogout(false);
@@ -67,8 +76,6 @@ export default function Home() {
         <h1 className="text-4xl font-extrabold text-blue-400">SportnearMe</h1>
       </div>
 
-      
-
       {/* Navigation Bar */}
       <nav className="bg-gray-800 border-b border-gray-700/50 py-2 flex justify-center items-center gap-6 px-6 text-lg md:text-xl whitespace-nowrap overflow-x-auto">
         {["Home", "Location", "About Us"].map((item) => (
@@ -82,18 +89,18 @@ export default function Home() {
         ))}
 
         <a
-            href="/catalogue"
-            className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-          >
-            Sports Catalogue
-          </a>
+          href="/catalogue"
+          className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+        >
+          Sports Catalogue
+        </a>
 
         <a
-            href="/signup-host"
-            className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
-          >
-            Host Your Services
-          </a>
+          href="/signup-host"
+          className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300"
+        >
+          Host Your Services
+        </a>
 
         {isLoggedIn ? (
           <button
@@ -120,16 +127,11 @@ export default function Home() {
         setUsername={setUsername}
       />
 
-      {/* Logout Menu */}
-      {showLogout && isLoggedIn && (
-        <LogoutMenu onLogout={handleLogout} />
-      )}
-
       {/* Highlighted Quote */}
       <div className="bg-gray-900 py-4 text-center px-4">
         {isLoggedIn && (
           <p className="text-lg md:text-3xl font-semibold mb-2">
-            Hello, {username.name }!
+            Hello, {username.firstName}!
           </p>
         )}
         <p className="text-blue-100 font-semibold text-sm md:text-2xl animate-pulse">{quote}</p>
