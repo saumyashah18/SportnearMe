@@ -57,4 +57,6 @@ const verifyOtp = async (otp) => {
   };
 
   return { sendOtp, verifyOtp, logout, firebaseUid };
+
+  
 }

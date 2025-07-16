@@ -8,6 +8,10 @@ dotenv.config();
 
 // Import routes
 const userRoute = require("./Routes/UserRoute");
+const ownerRoutes = require("./Routes/owner");
+app.use("/api/owner", ownerRoutes);
+
+
 
 const app = express();
 
