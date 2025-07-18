@@ -26,7 +26,7 @@ export default function ConfirmBooking() {
           <div>
             <p className="font-medium">Court 2</p>
           </div>
-          <button className="text-red-400 text-xl font-bold">&times;</button>
+          <button className="text-red-400 text-xl font-bold cursor-pointer">&times;</button>
         </div>
 
         <div className="text-sm space-y-1">
@@ -67,12 +67,12 @@ export default function ConfirmBooking() {
         {/* Toggle */}
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm">Pay full amount in advance</span>
-          <label className="relative inline-block w-12 h-6">
+          <label className="relative inline-block w-12 h-6 cursor-pointer">
             <input
               type="checkbox"
               checked={payFull}
               onChange={() => setPayFull(!payFull)}
-              className="peer opacity-0 w-0 h-0"
+              className="peer opacity-0 w-0 h-0 cursor-pointer"
             />
             <span className="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-600 rounded-full peer-checked:bg-green-500 transition"></span>
             <span className="absolute left-[2px] top-[2px] h-5 w-5 bg-white rounded-full peer-checked:left-[24px] transition"></span>
@@ -109,7 +109,7 @@ export default function ConfirmBooking() {
             INR <span className="text-lg font-bold text-white">{bottomAmount}</span>
           </p>
         </div>
-        <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full text-sm font-medium">
+        <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full text-sm font-medium cursor-pointer">
           Proceed to Pay →
         </button>
       </div>

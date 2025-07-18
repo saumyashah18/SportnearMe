@@ -81,6 +81,7 @@ export default function DashboardHost() {
     updatedSports[index][field] = value;
     setSports(updatedSports);
   };
+
   const addSportRow = () => {
     setSports([
       ...sports,
@@ -131,14 +132,14 @@ export default function DashboardHost() {
               {sports.map((sport, index) => (
                 <div
                   key={index}
-                  className="grid md:grid-cols-2 gap-4 border rounded p-4 relative bg-gray-50"// My name is suryaraj Jadeja
+                  className="grid md:grid-cols-2 gap-4 border rounded p-4 relative bg-gray-50"
                 >
                   <select
                     value={sport.sport}
                     onChange={(e) =>
                       handleInputChange(index, "sport", e.target.value)
                     }
-                    className="border p-2 rounded"
+                    className="border p-2 rounded cursor-pointer"
                   >
                     <option value="">Select Sport</option>
                     <option>Badminton</option>
@@ -163,7 +164,7 @@ export default function DashboardHost() {
                     onChange={(e) =>
                       handleInputChange(index, "minSlotDuration", e.target.value)
                     }
-                    className="border p-2 rounded"
+                    className="border p-2 rounded cursor-pointer"
                   >
                     <option value="">Select Min Slot Duration</option>
                     <option value="30">30 Minutes</option>
@@ -183,86 +184,88 @@ export default function DashboardHost() {
                     className="border p-2 rounded"
                   />
 
-                   <div className="mb-4">
-              <label className="font-semibold block mb-2">Weekly Availability</label>
-              <label className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={availability.sameForAll}
-                  onChange={(e) =>
-                    setAvailability((prev) => ({
-                      ...prev,
-                      sameForAll: e.target.checked,
-                    }))
-                  }
-                />
-                Same for all days
-              </label>
-
-              {availability.sameForAll ? (
-                <div className="flex gap-4 mb-4">
-                  <input
-                    type="time"
-                    value={availability.defaultStart}
-                    onChange={(e) =>
-                      setAvailability((prev) => ({
-                        ...prev,
-                        defaultStart: e.target.value,
-                      }))
-                    }
-                    className="border p-2 rounded"
-                  />
-                  <input
-                    type="time"
-                    value={availability.defaultEnd}
-                    onChange={(e) =>
-                      setAvailability((prev) => ({
-                        ...prev,
-                        defaultEnd: e.target.value,
-                      }))
-                    }
-                    className="border p-2 rounded"
-                  />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.keys(availability.days).map((day) => (
-                    <div key={day} className="flex items-center gap-2">
+                  <div className="mb-4">
+                    <label className="font-semibold block mb-2">Weekly Availability</label>
+                    <label className="flex items-center gap-2 mb-2 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={availability.days[day].open}
-                        onChange={() => toggleDayOpen(day)}
-                      />
-                      <label className="w-24">{day}</label>
-                      <input
-                        type="time"
-                        disabled={!availability.days[day].open}
-                        value={availability.days[day].start}
+                        checked={availability.sameForAll}
                         onChange={(e) =>
-                          handleAvailabilityChange(day, "start", e.target.value)
+                          setAvailability((prev) => ({
+                            ...prev,
+                            sameForAll: e.target.checked,
+                          }))
                         }
-                        className="border p-2 rounded flex-1"
+                        className="cursor-pointer"
                       />
-                      <input
-                        type="time"
-                        disabled={!availability.days[day].open}
-                        value={availability.days[day].end}
-                        onChange={(e) =>
-                          handleAvailabilityChange(day, "end", e.target.value)
-                        }
-                        className="border p-2 rounded flex-1"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                      Same for all days
+                    </label>
+
+                    {availability.sameForAll ? (
+                      <div className="flex gap-4 mb-4">
+                        <input
+                          type="time"
+                          value={availability.defaultStart}
+                          onChange={(e) =>
+                            setAvailability((prev) => ({
+                              ...prev,
+                              defaultStart: e.target.value,
+                            }))
+                          }
+                          className="border p-2 rounded"
+                        />
+                        <input
+                          type="time"
+                          value={availability.defaultEnd}
+                          onChange={(e) =>
+                            setAvailability((prev) => ({
+                              ...prev,
+                              defaultEnd: e.target.value,
+                            }))
+                          }
+                          className="border p-2 rounded"
+                        />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.keys(availability.days).map((day) => (
+                          <div key={day} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={availability.days[day].open}
+                              onChange={() => toggleDayOpen(day)}
+                              className="cursor-pointer"
+                            />
+                            <label className="w-24 cursor-pointer">{day}</label>
+                            <input
+                              type="time"
+                              disabled={!availability.days[day].open}
+                              value={availability.days[day].start}
+                              onChange={(e) =>
+                                handleAvailabilityChange(day, "start", e.target.value)
+                              }
+                              className="border p-2 rounded flex-1"
+                            />
+                            <input
+                              type="time"
+                              disabled={!availability.days[day].open}
+                              value={availability.days[day].end}
+                              onChange={(e) =>
+                                handleAvailabilityChange(day, "end", e.target.value)
+                              }
+                              className="border p-2 rounded flex-1"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   {sports.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeSportRow(index)}
-                      className="absolute right-2 text-red-500 hover:underline text-sm"
+                      className="absolute right-2 text-red-500 hover:underline text-sm cursor-pointer"
                     >
                       Remove
                     </button>
@@ -271,13 +274,11 @@ export default function DashboardHost() {
               ))}
             </div>
 
-            
-
             <div className="mt-4">
               <button
                 type="button"
                 onClick={addSportRow}
-                className="text-blue-500 hover:underline text-sm"
+                className="text-blue-500 hover:underline text-sm cursor-pointer"
               >
                 + Add Another Sport
               </button>
@@ -286,7 +287,7 @@ export default function DashboardHost() {
             <div className="text-right mt-6">
               <button
                 onClick={() => setShowBack(true)}
-                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 cursor-pointer"
               >
                 Continue to More Info
               </button>
@@ -302,7 +303,7 @@ export default function DashboardHost() {
               type="file"
               accept="image/*"
               onChange={(e) => setPrimaryImage(e.target.files[0])}
-              className="mb-4 border p-2 rounded w-full"
+              className="mb-4 border p-2 rounded w-full cursor-pointer"
             />
 
             <label className="block mb-2">Gallery Images (Max 4):</label>
@@ -313,7 +314,7 @@ export default function DashboardHost() {
               onChange={(e) =>
                 setGalleryImages(Array.from(e.target.files).slice(0, 4))
               }
-              className="mb-4 border p-2 rounded w-full"
+              className="mb-4 border p-2 rounded w-full cursor-pointer"
             />
 
             <h3 className="font-semibold mt-4 mb-2">Select Amenities Offered</h3>
@@ -322,7 +323,7 @@ export default function DashboardHost() {
                 <button
                   key={item}
                   onClick={() => toggleAmenity(item)}
-                  className={`px-4 py-2 rounded-full border text-sm ${
+                  className={`px-4 py-2 rounded-full border text-sm cursor-pointer ${
                     selectedAmenities.includes(item)
                       ? "bg-blue-600 text-white"
                       : "bg-gray-200 text-gray-800"
@@ -336,13 +337,13 @@ export default function DashboardHost() {
             <div className="flex justify-between mt-6">
               <button
                 onClick={() => setShowBack(false)}
-                className="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400"
+                className="bg-gray-300 text-gray-800 px-6 py-2 rounded hover:bg-gray-400 cursor-pointer"
               >
                 Back
               </button>
               <button
                 onClick={handlePublish}
-                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 cursor-pointer"
               >
                 Publish Turf
               </button>

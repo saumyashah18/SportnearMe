@@ -22,9 +22,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const handleSendOtp = async () => {
     if (/^\d{10}$/.test(phone)) {
       const res = await sendOtp(phone);
-      if (res.success) {
-        setStep("otp");
-      }
+      if (res.success) setStep("otp");
     }
   };
 
@@ -34,39 +32,32 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     updatedOtp[index] = value;
     setOtpDigits(updatedOtp);
     if (value && index < 5) inputRefs.current[index + 1]?.focus();
-};
+  };
 
-const handleVerifyOtp = async () => {
-  const otp = otpDigits.join("");
-  const uid = await verifyOtp(otp);
-  if (!uid) {
-    alert("OTP verification failed.");
-    return;
-  }
-
-  const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ firebaseUid: uid, phone }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.message || "Login failed");
-    return;
-  }
-
-  // Save JWT
-  localStorage.setItem("token", data.token);
-
-  if (data.needsProfile) {
-    setStep("name"); // new user → collect profile
-  } else {
-    setIsLoggedIn(true);
-    setStep("success"); // existing user
-  }
-};
+  const handleVerifyOtp = async () => {
+    const otp = otpDigits.join("");
+    const uid = await verifyOtp(otp);
+    if (!uid) {
+      alert("OTP verification failed.");
+      return;
+    }
+    const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ firebaseUid: uid, phone }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
+    }
+    localStorage.setItem("token", data.token);
+    if (data.needsProfile) setStep("name");
+    else {
+      setIsLoggedIn(true);
+      setStep("success");
+    }
+  };
 
   const handleCompleteProfile = async () => {
     const formData = new FormData();
@@ -78,35 +69,26 @@ const handleVerifyOtp = async () => {
     formData.append("phone", phone);
     formData.append("selectedSports", JSON.stringify(selectedSports));
     if (profileImage) formData.append("profileImage", profileImage);
-
     const token = localStorage.getItem("token");
-
     const res = await fetch("http://localhost:5001/api/users/completeProfile", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
-
     const data = await res.json();
-
     if (!res.ok) {
       alert(data.message || "Profile completion failed");
       return;
     }
-    // ✅ Save user profile data to localStorage
-localStorage.setItem("user", JSON.stringify({
-  firstName,
-  lastName,
-  gender,
-  gmail,
-  phone,
-  selectedSports,
-  image: typeof profileImage === "string" ? profileImage : null, // only if selected from preset
-}));
-
-setIsLoggedIn(true);
-setStep("success");
-
+    localStorage.setItem("user", JSON.stringify({
+      firstName,
+      lastName,
+      gender,
+      gmail,
+      phone,
+      selectedSports,
+      image: typeof profileImage === "string" ? profileImage : null,
+    }));
     setIsLoggedIn(true);
     setStep("success");
   };
@@ -123,7 +105,7 @@ setStep("success");
 
   return (
     <div className="fixed inset-0 z-50 backdrop-blur flex items-center justify-center">
-      <div className="bg-[#111827] text-white w-full max-w-md p-6 rounded-lg shadow-xl relative">
+      <div className="bg-[#111827] text-white w-full max-w-md p-6 rounded-lg shadow-xl relative cursor-pointer">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 text-2xl hover:text-white"
@@ -135,7 +117,7 @@ setStep("success");
         {step === "phone" && (
           <>
             <h2 className="text-center text-xl cursor-pointer font-semibold mb-6">Get Started</h2>
-            <div className="border border-gray-600 px-3 py-2 rounded flex items-center gap-2 bg-gray-900">
+            <div className="border border-gray-600 px-3 py-2 rounded flex items-center gap-2 bg-gray-900 cursor-pointer">
               🇮🇳 +91
               <input
                 type="text"
@@ -191,7 +173,7 @@ setStep("success");
           </>
         )}
 
-        {/* Profile steps only if needed */}
+        {/* Profile steps */}
         {step === "name" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Enter Your Name</h2>
@@ -227,7 +209,7 @@ setStep("success");
                 <button
                   key={g}
                   onClick={() => setGender(g)}
-                  className={`px-4 py-2 rounded border ${
+                  className={`px-4 py-2 rounded border cursor-pointer ${
                     gender === g
                       ? "bg-blue-600 border-blue-600"
                       : "border-gray-600"
@@ -297,61 +279,54 @@ setStep("success");
         )}
 
         {step === "image" && (
-  <>
-    <h2 className="text-center text-2xl font-bold mb-2">Let&apos;s set up your profile picture</h2>
-
-    {/* Circular Camera Upload */}
-    <div className="flex justify-center mb-4">
-      <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setProfileImage(e.target.files[0])}
-          className="hidden"
-        />
-      </label>
-    </div>
-
-    <p className="text-center text-gray-400 mb-4">or choose your avatar</p>
-
-    {/* Preset Avatars */}
-    <div className="flex justify-center gap-3 overflow-x-auto mb-6">
-      {[
-        "/avatars/avatar1.png",
-        "/avatars/avatar2.png",
-        "/avatars/avatar3.png",
-        "/avatars/avatar4.png",
-        "/avatars/avatar5.png"
-      ].map((src, idx) => (
-        <img
-          key={idx}
-          src={src}
-          alt={`Avatar ${idx + 1}`}
-          onClick={() => setProfileImage(src)}
-          className={`w-14 h-14 rounded-full cursor-pointer border-2 ${
-            profileImage === src ? "border-blue-500" : "border-transparent"
-          }`}
-        />
-      ))}
-    </div>
-
-    <button
-      onClick={handleCompleteProfile}
-      disabled={!profileImage}
-      className={`w-full py-2 rounded ${
-        profileImage
-          ? "bg-blue-600 hover:bg-blue-500"
-          : "bg-gray-600 cursor-not-allowed"
-      }`}
-    >
-      Continue
-    </button>
-  </>
-)}
-
+          <>
+            <h2 className="text-center text-2xl font-bold mb-2">Let&apos;s set up your profile picture</h2>
+            <div className="flex justify-center mb-4">
+              <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setProfileImage(e.target.files[0])}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <p className="text-center text-gray-400 mb-4">or choose your avatar</p>
+            <div className="flex justify-center gap-3 overflow-x-auto mb-6">
+              {[
+                "/avatars/avatar1.png",
+                "/avatars/avatar2.png",
+                "/avatars/avatar3.png",
+                "/avatars/avatar4.png",
+                "/avatars/avatar5.png"
+              ].map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={`Avatar ${idx + 1}`}
+                  onClick={() => setProfileImage(src)}
+                  className={`w-14 h-14 rounded-full cursor-pointer border-2 ${
+                    profileImage === src ? "border-blue-500" : "border-transparent"
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={handleCompleteProfile}
+              disabled={!profileImage}
+              className={`w-full py-2 rounded ${
+                profileImage
+                  ? "bg-blue-600 hover:bg-blue-500"
+                  : "bg-gray-600 cursor-not-allowed"
+              }`}
+            >
+              Continue
+            </button>
+          </>
+        )}
 
         {step === "success" && (
           <>

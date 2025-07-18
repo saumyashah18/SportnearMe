@@ -60,11 +60,11 @@ export default function TurfOwnerDashboard() {
       <aside className="w-64 bg-[#1e293b] p-6 space-y-6">
         <h1 className="text-2xl font-bold">Owner Console</h1>
         <nav className="space-y-2">
-          <a href="#" className="block p-2 rounded hover:bg-[#334155]">Dashboard</a>
-          <a href="#" className="block p-2 rounded hover:bg-[#334155]">Bookings</a>
-          <a href="/manage-turf" className="block p-2 rounded hover:bg-[#334155]">Manage Turf</a>
-          <a href="#" className="block p-2 rounded hover:bg-[#334155]">Revenue</a>
-          <a href="#" className="block p-2 rounded hover:bg-[#334155]">Support</a>
+          <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Dashboard</a>
+          <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Bookings</a>
+          <a href="/manage-turf" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Manage Turf</a>
+          <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Revenue</a>
+          <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Support</a>
         </nav>
       </aside>
 
@@ -72,7 +72,7 @@ export default function TurfOwnerDashboard() {
       <main className="flex-1 p-6 overflow-auto">
         {/* Turf Banner */}
         <section className="w-full mt-4 px-4 overflow-x-auto whitespace-nowrap space-x-2 flex">
-          <img src="/images/sport.jpeg" className="inline-block rounded-lg" alt="banner" />
+          <img src="/images/sport.jpeg" className="inline-block rounded-lg cursor-pointer" alt="banner" />
         </section>
 
         {/* Analytics */}

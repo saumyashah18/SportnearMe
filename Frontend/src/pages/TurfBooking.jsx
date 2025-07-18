@@ -50,7 +50,7 @@ export default function TurfBooking() {
         ].map((sport) => (
           <button
             key={sport.name}
-            className={`sport-btn min-w-[100px] p-4 rounded-lg flex flex-col items-center ${
+            className={`sport-btn min-w-[100px] p-4 rounded-lg flex flex-col items-center cursor-pointer ${
               selectedSport === sport.name ? "bg-blue-600" : "bg-[#1e293b] hover:bg-blue-600"
             }`}
             onClick={() => setSelectedSport(sport.name)}
@@ -66,7 +66,7 @@ export default function TurfBooking() {
         {getNext7Days().map((date, idx) => (
           <button
             key={idx}
-            className={`date-btn flex flex-col items-center px-4 py-2 rounded-lg hover:bg-blue-600 transition ${
+            className={`date-btn flex flex-col items-center px-4 py-2 rounded-lg hover:bg-blue-600 transition cursor-pointer ${
               selectedDate.toDateString() === date.toDateString()
                 ? "bg-blue-600"
                 : "bg-[#1e293b]"
@@ -107,7 +107,7 @@ export default function TurfBooking() {
                       <td key={court} className="p-3">
                         <button
                           onClick={() => toggleSlot(slotId)}
-                          className={`w-full py-4 rounded-lg text-sm ${
+                          className={`w-full py-4 rounded-lg text-sm cursor-pointer ${
                             isSelected ? "bg-green-600" : "bg-[#334155] hover:bg-blue-600"
                           }`}
                         >
@@ -132,7 +132,7 @@ export default function TurfBooking() {
         </div>
         <button
           onClick={() => selectedSlots.length > 0 && setIsConfirmModalOpen(true)}
-          className="bg-rose-600 hover:bg-rose-700 text-white text-sm px-6 py-2 font-semibold"
+          className="bg-rose-600 hover:bg-rose-700 text-white text-sm px-6 py-2 font-semibold cursor-pointer"
         >
           Confirm Booking
         </button>
@@ -150,13 +150,13 @@ export default function TurfBooking() {
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => setIsConfirmModalOpen(false)}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmBooking}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg cursor-pointer"
               >
                 Confirm
               </button>

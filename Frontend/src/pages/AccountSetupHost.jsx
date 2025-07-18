@@ -15,7 +15,7 @@ const AccountSetupHost = () => {
       {/* Header */}
       <header className="bg-[#1f2937] text-white px-6 py-4 flex justify-between items-center">
         <h1 className="text-xl font-bold">SportnearMe Ground Partner</h1>
-        <a href="#" className="text-sm underline">
+        <a href="#" className="text-sm underline cursor-pointer">
           Sign Out
         </a>
       </header>
@@ -29,13 +29,13 @@ const AccountSetupHost = () => {
 
         {/* Step Indicators */}
         <div className="flex justify-between text-sm font-semibold border-b border-slate-600 pb-2 mb-4">
-          <button onClick={() => setStep(1)} className={step === 1 ? "text-blue-400" : "text-slate-500"}>
+          <button onClick={() => setStep(1)} className={`${step === 1 ? "text-blue-400" : "text-slate-500"} cursor-pointer`}>
             1. Turf-Owner information
           </button>
-          <button onClick={() => setStep(2)} className={step === 2 ? "text-blue-400" : "text-slate-500"}>
+          <button onClick={() => setStep(2)} className={`${step === 2 ? "text-blue-400" : "text-slate-500"} cursor-pointer`}>
             2. Turf information
           </button>
-          <button onClick={() => setStep(3)} className={step === 3 ? "text-blue-400" : "text-slate-500"}>
+          <button onClick={() => setStep(3)} className={`${step === 3 ? "text-blue-400" : "text-slate-500"} cursor-pointer`}>
             3. Finish Setup
           </button>
         </div>
@@ -49,7 +49,7 @@ const AccountSetupHost = () => {
               <input type="email" placeholder="Email" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
               <input type="text" placeholder="Gender" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
             </div>
-            <button onClick={() => setStep(2)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
+            <button onClick={() => setStep(2)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded cursor-pointer">
               Next
             </button>
           </div>
@@ -61,17 +61,16 @@ const AccountSetupHost = () => {
             <div className="grid md:grid-cols-2 gap-4 mb-4">
               <input type="text" placeholder="Turf Name" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
               <input type="text" placeholder="Turf Address" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
-
-          </div>
-            <div className= "grid h-14 gap-4 mb-15" >
+            </div>
+            <div className="grid h-14 gap-4 mb-15">
               <input type="text" placeholder="Turf Description" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
               <input type="link" placeholder="Turf Location URL" className="bg-transparent border border-slate-600 text-white p-2 rounded" />
             </div>
 
-            <button onClick={() => setStep(1)} className="text-sm underline mr-4 text-blue-400">
+            <button onClick={() => setStep(1)} className="text-sm underline mr-4 text-blue-400 cursor-pointer">
               ← Back
             </button>
-            <button onClick={() => setStep(3)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
+            <button onClick={() => setStep(3)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded cursor-pointer">
               Next
             </button>
           </div>
@@ -84,12 +83,12 @@ const AccountSetupHost = () => {
               By proceeding, you confirm all your details are accurate and agree to our partner terms.
             </p>
             <div className="flex justify-center gap-4">
-              <button onClick={() => setStep(2)} className="text-sm underline text-blue-400">
+              <button onClick={() => setStep(2)} className="text-sm underline text-blue-400 cursor-pointer">
                 ← Back
               </button>
               <button
                 onClick={completeSetup}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded cursor-pointer"
               >
                 Proceed to Dashboard
               </button>
