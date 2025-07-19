@@ -1,8 +1,9 @@
-// src/components/AuthModal.jsx
 import React, { useState, useRef } from "react";
 import sportsData from "../data/sportsData";
 import { useAuth } from "../Hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase";
 
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [step, setStep] = useState("phone");
@@ -59,45 +60,55 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     }
   };
 
+  const uploadImageAndGetURL = async () => {
+    if (!profileImage) return null;
+
+    if (typeof profileImage === "string") {
+      // If user chose an avatar (already hosted on your server)
+      return profileImage;
+    }
+
+    const fileRef = ref(storage, `profileImages/${firebaseUid}_${Date.now()}`);
+    await uploadBytes(fileRef, profileImage);
+    const url = await getDownloadURL(fileRef);
+    return url;
+  };
+
   const handleCompleteProfile = async () => {
-    const formData = new FormData();
-    formData.append("firebaseUid", firebaseUid);
-    formData.append("firstName", firstName);
-    formData.append("lastName", lastName);
-    formData.append("gender", gender);
-    formData.append("gmail", gmail);
-    formData.append("phone", phone);
-    formData.append("selectedSports", JSON.stringify(selectedSports));
-    if (profileImage) formData.append("profileImage", profileImage);
+    const imageUrl = await uploadImageAndGetURL();
+
     const token = localStorage.getItem("token");
     const res = await fetch("http://localhost:5001/api/users/completeProfile", {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        gender,
+        gmail,
+        phone,
+        selectedSports,
+        profileImageUrl: imageUrl,
+      }),
     });
+
     const data = await res.json();
     if (!res.ok) {
       alert(data.message || "Profile completion failed");
       return;
     }
-    localStorage.setItem("user", JSON.stringify({
-      firstName,
-      lastName,
-      gender,
-      gmail,
-      phone,
-      selectedSports,
-      image: typeof profileImage === "string" ? profileImage : null,
-    }));
+
+    localStorage.setItem("user", JSON.stringify(data.user));
     setIsLoggedIn(true);
     setStep("success");
   };
 
   const toggleSport = (sport) => {
     setSelectedSports((prev) =>
-      prev.includes(sport)
-        ? prev.filter((s) => s !== sport)
-        : [...prev, sport]
+      prev.includes(sport) ? prev.filter((s) => s !== sport) : [...prev, sport]
     );
   };
 
@@ -113,11 +124,11 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           &times;
         </button>
 
-        {/* Phone */}
+        {/* STEP: Phone */}
         {step === "phone" && (
           <>
-            <h2 className="text-center text-xl cursor-pointer font-semibold mb-6">Get Started</h2>
-            <div className="border border-gray-600 px-3 py-2 rounded flex items-center gap-2 bg-gray-900 cursor-pointer">
+            <h2 className="text-center text-xl font-semibold mb-6">Get Started</h2>
+            <div className="border border-gray-600 px-3 py-2 rounded flex items-center gap-2 bg-gray-900">
               🇮🇳 +91
               <input
                 type="text"
@@ -142,7 +153,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
-        {/* OTP */}
+        {/* STEP: OTP */}
         {step === "otp" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Verify OTP</h2>
@@ -162,18 +173,14 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={handleVerifyOtp}
               disabled={!otpDigits.every((d) => d !== "")}
-              className={`w-full py-2 rounded ${
-                otpDigits.every((d) => d !== "")
-                  ? "bg-green-600 hover:bg-green-500"
-                  : "bg-gray-600 cursor-not-allowed"
-              }`}
+              className="w-full py-2 rounded bg-green-600 hover:bg-green-500"
             >
               Verify OTP
             </button>
           </>
         )}
 
-        {/* Profile steps */}
+        {/* STEP: Name */}
         {step === "name" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Enter Your Name</h2>
@@ -201,6 +208,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
+        {/* STEP: Gender */}
         {step === "gender" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Select Gender</h2>
@@ -209,10 +217,8 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
                 <button
                   key={g}
                   onClick={() => setGender(g)}
-                  className={`px-4 py-2 rounded border cursor-pointer ${
-                    gender === g
-                      ? "bg-blue-600 border-blue-600"
-                      : "border-gray-600"
+                  className={`px-4 py-2 rounded border ${
+                    gender === g ? "bg-blue-600 border-blue-600" : "border-gray-600"
                   }`}
                 >
                   {g}
@@ -229,6 +235,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
+        {/* STEP: Gmail */}
         {step === "gmail" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Enter Gmail</h2>
@@ -249,6 +256,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
+        {/* STEP: Sports */}
         {step === "sports" && (
           <>
             <h2 className="text-center text-xl font-semibold mb-4">Pick Your Sports</h2>
@@ -278,9 +286,10 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           </>
         )}
 
+        {/* STEP: Image */}
         {step === "image" && (
           <>
-            <h2 className="text-center text-2xl font-bold mb-2">Let&apos;s set up your profile picture</h2>
+            <h2 className="text-center text-2xl font-bold mb-2">Set up your profile picture</h2>
             <div className="flex justify-center mb-4">
               <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -317,13 +326,9 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={handleCompleteProfile}
               disabled={!profileImage}
-              className={`w-full py-2 rounded ${
-                profileImage
-                  ? "bg-blue-600 hover:bg-blue-500"
-                  : "bg-gray-600 cursor-not-allowed"
-              }`}
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
             >
-              Continue
+              Complete Profile
             </button>
           </>
         )}
@@ -331,7 +336,6 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
         {step === "success" && (
           <>
             <h2 className="text-center text-2xl font-bold mb-4">🎉 All Set!</h2>
-            <p className="text-center text-gray-300 mb-4">Enjoy using SportNearMe!</p>
             <button
               onClick={() => {
                 onClose();

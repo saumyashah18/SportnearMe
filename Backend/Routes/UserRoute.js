@@ -1,39 +1,46 @@
 const express = require("express");
-const multer = require("multer");
 const User = require("../models/User");
 const { generateToken, verifyToken } = require("../middleware/auth");
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" }); 
 
 // 🔷 loginOrRegister
 router.post("/loginOrRegister", async (req, res) => {
   const { firebaseUid, phone } = req.body;
 
   if (!firebaseUid || !phone) {
-    return res.status(400).json({ message: "firebaseUid and phone are required" });
+    return res
+      .status(400)
+      .json({ message: "firebaseUid and phone are required" });
   }
 
   try {
     let user = await User.findOne({ firebaseUid });
 
     if (!user) {
-      user = new User({ firebaseUid, phone });
-      await user.save();
-      const token = generateToken({ id: user._id });
-      return res.status(201).json({
-        message: "✅ New user created",
-        user,
-        needsProfile: true,
-        token,
-      });
+      // 🔷 If no user found with firebaseUid, check by phone
+      user = await User.findOne({ phone });
+
+      if (user) {
+        // 🔷 If phone exists but firebaseUid mismatches, update firebaseUid
+        user.firebaseUid = firebaseUid;
+        await user.save();
+      } else {
+        // 🔷 Neither firebaseUid nor phone found — create new user
+        user = new User({ firebaseUid, phone });
+        await user.save();
+      }
     }
 
     const token = generateToken({ id: user._id });
+
+    // 🔷 Check if profile is incomplete
+    const needsProfile = !user.firstName || !user.gmail;
+
     res.status(200).json({
-      message: "✅ Existing user",
+      message: "✅ User logged in or registered",
       user,
-      needsProfile: false,
+      needsProfile,
       token,
     });
   } catch (err) {
@@ -43,14 +50,21 @@ router.post("/loginOrRegister", async (req, res) => {
 });
 
 // 🔷 completeProfile
-router.post("/completeProfile", verifyToken, upload.single("profileImage"), async (req, res) => {
+router.post("/completeProfile", verifyToken, async (req, res) => {
   const {
     firstName,
     lastName,
     gender,
     gmail,
     selectedSports,
+    profileImageUrl,
   } = req.body;
+
+  if (!profileImageUrl) {
+    return res
+      .status(400)
+      .json({ message: "profileImageUrl is required. Upload your image to Firebase first." });
+  }
 
   try {
     const user = await User.findById(req.user.id);
@@ -62,27 +76,35 @@ router.post("/completeProfile", verifyToken, upload.single("profileImage"), asyn
     user.lastName = lastName;
     user.gender = gender;
     user.gmail = gmail;
-    user.selectedSports = JSON.parse(selectedSports);
-    if (req.file) {
-      user.profileImageUrl = req.file.path;
+
+    if (Array.isArray(selectedSports)) {
+      user.selectedSports = selectedSports;
+    } else if (typeof selectedSports === "string") {
+      // just in case frontend sent JSON string
+      user.selectedSports = JSON.parse(selectedSports);
     }
 
+    user.profileImageUrl = profileImageUrl;
+
     await user.save();
-    res.status(200).json({ message: "✅ Profile completed", user });
+    res
+      .status(200)
+      .json({ message: "✅ Profile completed", user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "❌ Server error" });
   }
 });
 
-// backend/Routes/UserRoute.js
+// 🔷 get current user
 router.get("/me", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json({ user });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ message: "❌ Server error" });
   }
 });
 
