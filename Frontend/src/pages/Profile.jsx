@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Calendar, CreditCard, User2, Mail, Gift, Upload } from "lucide-react";
+import { LogOut, Calendar, CreditCard, User2, Mail, Gift } from "lucide-react";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [newImageFile, setNewImageFile] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -45,38 +43,6 @@ export default function Profile() {
     window.location.reload();
   };
 
-  const handleImageUpload = async () => {
-    if (!newImageFile) return;
-
-    const formData = new FormData();
-    formData.append("profileImage", newImageFile);
-
-    const token = localStorage.getItem("token");
-
-    try {
-      const res = await fetch("http://localhost:5001/api/users/completeProfile", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message || "Failed to update profile image");
-        return;
-      }
-
-      setUser(data.user);
-      setShowUploadModal(false);
-      setNewImageFile(null);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to upload image");
-    }
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen bg-[#0f172a] text-white flex justify-center items-center">
@@ -85,13 +51,17 @@ export default function Profile() {
     );
   }
 
-  const getProfileImageUrl = () => {
-    if (user.profileImageUrl) {
-      return user.profileImageUrl;
-    } else {
-      return `https://robohash.org/${user.firebaseUid || user.phone}?set=set4`;
-    }
-  };
+  // 🏆 Sport-themed fallback images
+  const sportFallbacks = [
+    "/avatars/football.png",
+    "/avatars/basketball.png",
+    "/avatars/runner.png",
+    "/avatars/tennis.png",
+    "/avatars/default-athlete.png",
+  ];
+
+  const fallbackImage =
+    sportFallbacks[user._id.charCodeAt(0) % sportFallbacks.length];
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-4 md:p-10">
@@ -105,19 +75,20 @@ export default function Profile() {
               {user.phone} <span className="text-blue-400 cursor-pointer">Change</span>
             </p>
           </div>
-          <div className="relative">
-            <img
-              src={getProfileImageUrl()}
-              alt="Avatar"
-              className="w-16 h-16 rounded-full object-cover border border-gray-600"
-            />
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1 hover:bg-blue-500"
-              title="Change"
-            >
-              <Upload className="w-4 h-4 text-white" />
-            </button>
+          <div>
+            {user.profileImageUrl ? (
+              <img
+                src={user.profileImageUrl}
+                alt="Avatar"
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            ) : (
+              <img
+                src={fallbackImage}
+                alt="Sporty Avatar"
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            )}
           </div>
         </div>
 
@@ -175,6 +146,16 @@ export default function Profile() {
             </div>
           </div>
 
+          <div className="bg-[#0f172a] rounded-xl p-4 border border-gray-700 cursor-pointer hover:bg-[#1e293b]">
+            <div className="flex items-center gap-3">
+              <User2 className="text-teal-400" />
+              <div>
+                <h4 className="font-semibold">Corporate Profile</h4>
+                <p className="text-sm text-gray-400">View your booked events and venues</p>
+              </div>
+            </div>
+          </div>
+
           <button
             onClick={handleLogout}
             className="w-full mt-6 py-2 border border-red-500 text-red-500 hover:bg-red-600 hover:text-white rounded-full font-semibold"
@@ -183,36 +164,6 @@ export default function Profile() {
           </button>
         </div>
       </div>
-
-      {/* Upload Modal */}
-      {showUploadModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-[#1e293b] p-6 rounded-lg shadow-lg w-96">
-            <h3 className="text-xl font-semibold mb-4 text-white">Update Profile Image</h3>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setNewImageFile(e.target.files[0])}
-              className="text-white mb-4"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowUploadModal(false)}
-                className="px-4 py-1 rounded bg-gray-600 hover:bg-gray-500"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleImageUpload}
-                disabled={!newImageFile}
-                className="px-4 py-1 rounded bg-blue-600 hover:bg-blue-500 disabled:opacity-50"
-              >
-                Upload
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
