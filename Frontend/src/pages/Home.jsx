@@ -93,11 +93,20 @@ export default function Home() {
         ))}
         <a href="/catalogue" className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300 cursor-pointer">Sports Catalogue</a>
         <a href="/signup-host" className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300 cursor-pointer">Host Your Services</a>
-        {isLoggedIn ? (
-          <button onClick={handleProfileClick} className="px-4 py-1 rounded bg-green-600 text-white text-lg hover:bg-green-500 transition whitespace-nowrap cursor-pointer">Profile</button>
-        ) : (
-          <button onClick={() => setAuthModalOpen(true)} className="px-4 py-1 rounded cursor-pointer bg-blue-600 text-white text-lg hover:bg-blue-500 transition whitespace-nowrap">Login / Sign Up</button>
-        )}
+       {isLoggedIn ? (
+  <button onClick={handleProfileClick} className="flex items-center gap-2 cursor-pointer">
+    <img
+      src={username?.profileImageUrl || "/avatars/default.png"}
+      alt="Profile"
+      className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
+      onError={(e) => { e.target.onerror = null; e.target.src="/avatars/default.png" }}
+    />
+  </button>
+) : (
+  <button onClick={() => setAuthModalOpen(true)} className="px-4 py-1 rounded cursor-pointer bg-blue-600 text-white text-lg hover:bg-blue-500 transition whitespace-nowrap">Login / Sign Up</button>
+)}
+
+  
       </nav>
 
       {/* Sidebar for Mobile */}

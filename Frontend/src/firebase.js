@@ -8,7 +8,7 @@ const firebaseConfig = {
   authDomain: "sportnearme-44204.firebaseapp.com",
   databaseURL: "https://sportnearme-44204-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "sportnearme-44204",
-  storageBucket: "sportnearme-44204.appspot.com", // 🔷 FIXED HERE
+  storageBucket: "sportnearme-44204.firebasestorage.app",
   messagingSenderId: "872064899072",
   appId: "1:872064899072:web:090b02e8fe4556b23ea0e5",
   measurementId: "G-9WCD95HYV2"

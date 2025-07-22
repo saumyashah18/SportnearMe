@@ -3,11 +3,14 @@ import sportsData from "../data/sportsData";
 import { useAuth } from "../Hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth } from "../firebase";
+import { useEffect } from "react";
 import { storage } from "../firebase";
 
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
   const [firstName, setFirstName] = useState("");
@@ -16,13 +19,17 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [gmail, setGmail] = useState("");
   const [selectedSports, setSelectedSports] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
 
   const { sendOtp, verifyOtp, firebaseUid } = useAuth();
   const navigate = useNavigate();
 
   const handleSendOtp = async () => {
     if (/^\d{10}$/.test(phone)) {
+      setIsSendingOtp(true);
       const res = await sendOtp(phone);
+      setIsSendingOtp(false);
       if (res.success) setStep("otp");
     }
   };
@@ -33,6 +40,17 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     updatedOtp[index] = value;
     setOtpDigits(updatedOtp);
     if (value && index < 5) inputRefs.current[index + 1]?.focus();
+  };
+
+   const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && otpDigits[index] === "") {
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+        const updatedOtp = [...otpDigits];
+        updatedOtp[index - 1] = "";
+        setOtpDigits(updatedOtp);
+      }
+    }
   };
 
   const handleVerifyOtp = async () => {
@@ -60,19 +78,22 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     }
   };
 
-  const uploadImageAndGetURL = async () => {
-    if (!profileImage) return null;
+const uploadImageAndGetURL = async () => {
+  if (!profileImage) return null;
+  if (typeof profileImage === "string") return profileImage;
 
-    if (typeof profileImage === "string") {
-      // If user chose an avatar (already hosted on your server)
-      return profileImage;
-    }
+  if (!auth.currentUser) {
+    alert("You are not signed in, please complete OTP verification.");
+    return null;
+  }
 
-    const fileRef = ref(storage, `profileImages/${firebaseUid}_${Date.now()}`);
-    await uploadBytes(fileRef, profileImage);
-    const url = await getDownloadURL(fileRef);
-    return url;
-  };
+  const fileRef = ref(storage, `profileImages/${auth.currentUser.uid}_${Date.now()}`);
+  await uploadBytes(fileRef, profileImage);
+  const url = await getDownloadURL(fileRef);
+  console.log("✅ File uploaded successfully:", url);
+  return url;
+};
+
 
   const handleCompleteProfile = async () => {
     const imageUrl = await uploadImageAndGetURL();
@@ -102,6 +123,10 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     }
 
     localStorage.setItem("user", JSON.stringify(data.user));
+    if (imageUrl) {
+  localStorage.setItem("profileImage", imageUrl);
+}
+
     setIsLoggedIn(true);
     setStep("success");
   };
@@ -112,10 +137,52 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     );
   };
 
+  useEffect(() => {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      try {
+        if (step === "phone" && /^\d{10}$/.test(phone) && !isSendingOtp) {
+          handleSendOtp();
+        } else if (step === "otp" && otpDigits.every((d) => d !== "")) {
+          handleVerifyOtp();
+        } else if (step === "name" && firstName && lastName) {
+          setStep("gender");
+        } else if (step === "gender" && gender) {
+          setStep("gmail");
+        } else if (step === "gmail" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)) {
+          setStep("sports");
+        } else if (step === "sports" && selectedSports.length > 0) {
+          setStep("image");
+        } else if (step === "image" && profileImage) {
+          handleCompleteProfile();
+        }
+      } catch (err) {
+        console.error("Error in handleKeyDown:", err);
+      }
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [
+  step,
+  phone,
+  isSendingOtp,
+  otpDigits,
+  firstName,
+  lastName,
+  gender,
+  gmail,
+  selectedSports,
+  profileImage,
+]);
+
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 backdrop-blur flex items-center justify-center">
+    
       <div className="bg-[#111827] text-white w-full max-w-md p-6 rounded-lg shadow-xl relative cursor-pointer">
         <button
           onClick={onClose}
@@ -141,14 +208,14 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             </div>
             <button
               onClick={handleSendOtp}
-              disabled={!/^\d{10}$/.test(phone)}
-              className={`mt-4 w-full py-2 rounded ${
-                /^\d{10}$/.test(phone)
+              disabled={!/^\d{10}$/.test(phone) || isSendingOtp}
+              className={`mt-4 w-full py-2 rounded cursor-pointer ${
+                /^\d{10}$/.test(phone) && !isSendingOtp
                   ? "bg-blue-600 hover:bg-blue-500"
-                  : "bg-gray-600 cursor-not-allowed"
+                  : "bg-gray-600 opacity-70"
               }`}
             >
-              Send OTP
+              {isSendingOtp ? "Sending OTP..." : "Send OTP"}
             </button>
           </>
         )}
@@ -165,6 +232,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
                   type="text"
                   value={digit}
                   onChange={(e) => handleOtpChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                   maxLength={1}
                   className="w-10 h-10 text-center text-lg border border-gray-600 rounded bg-gray-900 focus:outline-none focus:border-blue-500"
                 />
@@ -173,7 +241,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={handleVerifyOtp}
               disabled={!otpDigits.every((d) => d !== "")}
-              className="w-full py-2 rounded bg-green-600 hover:bg-green-500"
+              className="w-full py-2 rounded cursor-pointer bg-green-600 hover:bg-green-500"
             >
               Verify OTP
             </button>
@@ -201,7 +269,11 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={() => setStep("gender")}
               disabled={!firstName || !lastName}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
+              className={`w-full py-2 rounded cursor-pointer ${
+                firstName && lastName
+                  ? "bg-blue-600 hover:bg-blue-500"
+                  : "bg-gray-600 opacity-70"
+              }`}
             >
               Continue
             </button>
@@ -217,7 +289,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
                 <button
                   key={g}
                   onClick={() => setGender(g)}
-                  className={`px-4 py-2 rounded border ${
+                  className={`px-4 py-2 rounded border cursor-pointer ${
                     gender === g ? "bg-blue-600 border-blue-600" : "border-gray-600"
                   }`}
                 >
@@ -228,7 +300,9 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={() => setStep("gmail")}
               disabled={!gender}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
+              className={`w-full py-2 rounded cursor-pointer ${
+                gender ? "bg-blue-600 hover:bg-blue-500" : "bg-gray-600 opacity-70"
+              }`}
             >
               Continue
             </button>
@@ -249,7 +323,11 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={() => setStep("sports")}
               disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
+              className={`w-full py-2 rounded cursor-pointer ${
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)
+                  ? "bg-blue-600 hover:bg-blue-500"
+                  : "bg-gray-600 opacity-70"
+              }`}
             >
               Continue
             </button>
@@ -279,7 +357,11 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             <button
               onClick={() => setStep("image")}
               disabled={selectedSports.length === 0}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 mt-4"
+              className={`w-full py-2 rounded cursor-pointer mt-4 ${
+                selectedSports.length > 0
+                  ? "bg-blue-600 hover:bg-blue-500"
+                  : "bg-gray-600 opacity-70"
+              }`}
             >
               Continue
             </button>
@@ -291,17 +373,43 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
           <>
             <h2 className="text-center text-2xl font-bold mb-2">Set up your profile picture</h2>
             <div className="flex justify-center mb-4">
-              <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setProfileImage(e.target.files[0])}
-                  className="hidden"
-                />
-              </label>
+              {previewImage ? (
+                <div className="relative">
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-blue-500"
+                  />
+                  <button
+                    onClick={() => {
+                      setProfileImage(null);
+                      setPreviewImage(null);
+                    }}
+                    className="absolute top-0 right-0 bg-black bg-opacity-60 rounded-full p-1 text-white hover:bg-opacity-80"
+                    title="Remove selection"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ) :  (
+                <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setProfileImage(file);
+                        setPreviewImage(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
             <p className="text-center text-gray-400 mb-4">or choose your avatar</p>
             <div className="flex justify-center gap-3 overflow-x-auto mb-6">
@@ -316,7 +424,10 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
                   key={idx}
                   src={src}
                   alt={`Avatar ${idx + 1}`}
-                  onClick={() => setProfileImage(src)}
+                  onClick={() => {
+                    setProfileImage(src);
+                    setPreviewImage(src);
+                  }}
                   className={`w-14 h-14 rounded-full cursor-pointer border-2 ${
                     profileImage === src ? "border-blue-500" : "border-transparent"
                   }`}
@@ -325,8 +436,10 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
             </div>
             <button
               onClick={handleCompleteProfile}
-              disabled={!profileImage}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
+              disabled={!profileImage }
+              className={`w-full py-2 rounded cursor-pointer ${
+                profileImage ? "bg-blue-600 hover:bg-blue-500" : "bg-gray-600 opacity-70"
+              }`}
             >
               Complete Profile
             </button>
@@ -341,7 +454,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
                 onClose();
                 navigate("/");
               }}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500"
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 cursor-pointer"
             >
               Continue
             </button>
