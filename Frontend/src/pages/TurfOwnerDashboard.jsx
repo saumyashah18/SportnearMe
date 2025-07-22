@@ -11,7 +11,6 @@ export default function TurfOwnerDashboard() {
   const { currentUser } = useAuth();
   const firebaseUid = currentUser?.uid;
 
- 
 
   useEffect(() => {
     fetch(`/api/turf-owner/${firebaseUid}`)
