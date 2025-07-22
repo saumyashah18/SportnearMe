@@ -51,7 +51,6 @@ export default function Profile() {
     );
   }
 
-  // 🏆 Sport-themed fallback images
   const sportFallbacks = [
     "/avatars/football.png",
     "/avatars/basketball.png",
