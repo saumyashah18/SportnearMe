@@ -4,7 +4,7 @@ import { useAuth } from "../Hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth } from "../firebase";
-
+import { useEffect } from "react";
 import { storage } from "../firebase";
 
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
@@ -20,6 +20,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [selectedSports, setSelectedSports] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+
 
   const { sendOtp, verifyOtp, firebaseUid } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +40,17 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
     updatedOtp[index] = value;
     setOtpDigits(updatedOtp);
     if (value && index < 5) inputRefs.current[index + 1]?.focus();
+  };
+
+   const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && otpDigits[index] === "") {
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+        const updatedOtp = [...otpDigits];
+        updatedOtp[index - 1] = "";
+        setOtpDigits(updatedOtp);
+      }
+    }
   };
 
   const handleVerifyOtp = async () => {
@@ -111,6 +123,10 @@ const uploadImageAndGetURL = async () => {
     }
 
     localStorage.setItem("user", JSON.stringify(data.user));
+    if (imageUrl) {
+  localStorage.setItem("profileImage", imageUrl);
+}
+
     setIsLoggedIn(true);
     setStep("success");
   };
@@ -121,10 +137,52 @@ const uploadImageAndGetURL = async () => {
     );
   };
 
+  useEffect(() => {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      try {
+        if (step === "phone" && /^\d{10}$/.test(phone) && !isSendingOtp) {
+          handleSendOtp();
+        } else if (step === "otp" && otpDigits.every((d) => d !== "")) {
+          handleVerifyOtp();
+        } else if (step === "name" && firstName && lastName) {
+          setStep("gender");
+        } else if (step === "gender" && gender) {
+          setStep("gmail");
+        } else if (step === "gmail" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)) {
+          setStep("sports");
+        } else if (step === "sports" && selectedSports.length > 0) {
+          setStep("image");
+        } else if (step === "image" && profileImage) {
+          handleCompleteProfile();
+        }
+      } catch (err) {
+        console.error("Error in handleKeyDown:", err);
+      }
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [
+  step,
+  phone,
+  isSendingOtp,
+  otpDigits,
+  firstName,
+  lastName,
+  gender,
+  gmail,
+  selectedSports,
+  profileImage,
+]);
+
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 backdrop-blur flex items-center justify-center">
+    
       <div className="bg-[#111827] text-white w-full max-w-md p-6 rounded-lg shadow-xl relative cursor-pointer">
         <button
           onClick={onClose}
@@ -174,6 +232,7 @@ const uploadImageAndGetURL = async () => {
                   type="text"
                   value={digit}
                   onChange={(e) => handleOtpChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                   maxLength={1}
                   className="w-10 h-10 text-center text-lg border border-gray-600 rounded bg-gray-900 focus:outline-none focus:border-blue-500"
                 />
@@ -315,12 +374,24 @@ const uploadImageAndGetURL = async () => {
             <h2 className="text-center text-2xl font-bold mb-2">Set up your profile picture</h2>
             <div className="flex justify-center mb-4">
               {previewImage ? (
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  className="w-24 h-24 rounded-full object-cover border-2 border-blue-500"
-                />
-              ) : (
+                <div className="relative">
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-blue-500"
+                  />
+                  <button
+                    onClick={() => {
+                      setProfileImage(null);
+                      setPreviewImage(null);
+                    }}
+                    className="absolute top-0 right-0 bg-black bg-opacity-60 rounded-full p-1 text-white hover:bg-opacity-80"
+                    title="Remove selection"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ) :  (
                 <label className="w-24 h-24 rounded-full border-2 border-dashed border-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -365,7 +436,7 @@ const uploadImageAndGetURL = async () => {
             </div>
             <button
               onClick={handleCompleteProfile}
-              disabled={!profileImage}
+              disabled={!profileImage }
               className={`w-full py-2 rounded cursor-pointer ${
                 profileImage ? "bg-blue-600 hover:bg-blue-500" : "bg-gray-600 opacity-70"
               }`}
