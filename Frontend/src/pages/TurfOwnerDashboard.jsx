@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 
+
 export default function TurfOwnerDashboard() {
   const monthlyChartRef = useRef(null);
   const revenueChartRef = useRef(null);
@@ -63,6 +64,7 @@ export default function TurfOwnerDashboard() {
           <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Dashboard</a>
           <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Bookings</a>
           <a href="/manage-turf" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Manage Turf</a>
+          <a href="/turf_profile" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">  My Profile</a>
           <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Revenue</a>
           <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Support</a>
         </nav>

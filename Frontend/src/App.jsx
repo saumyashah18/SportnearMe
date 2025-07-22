@@ -8,7 +8,9 @@ import SportsCatalogue from "./pages/SportsCatalogue";
 import TurfBooking from "./pages/TurfBooking";
 import ConfirmBooking from "./pages/ConfirmBooking";
 import TurfOwnerDashboard from "./pages/TurfOwnerDashboard";
-import Profile from "./pages/profile";
+import Profile from "./pages/Profile";
+import TurfProfile from "./pages/TurfProfile";
+
 
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
         <Route path="/turfbooking" element={<TurfBooking />} />
         <Route path="/confirmbooking" element={<ConfirmBooking />} />
         <Route path="/turfownerdashboard" element={<TurfOwnerDashboard />} />
+        <Route path="/turf_profile" element={<TurfProfile />} />
       </Routes>
     </Router>
   );
