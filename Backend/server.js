@@ -10,8 +10,6 @@ dotenv.config();
 const userRoute = require("./Routes/UserRoute");
 
 
-
-
 const app = express();
 
 // Middleware
