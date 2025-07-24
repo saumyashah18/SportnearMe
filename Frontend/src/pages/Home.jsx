@@ -9,12 +9,12 @@ import { Menu } from "lucide-react";
 
 export default function Home() {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
   const [quote, setQuote] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  const { isLoggedIn, user, logout } = useAuth();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  
 
   const sportsQuotes = [
     "🏸 Smash your limits, not just the shuttle!",
@@ -35,11 +35,6 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      setIsLoggedIn(true);
-      setUsername(user);
-    }
     setQuote(sportsQuotes[Math.floor(Math.random() * sportsQuotes.length)]);
   }, []);
 
@@ -49,11 +44,9 @@ export default function Home() {
 
   const handleLogout = async () => {
     await logout();
-    localStorage.removeItem("user");
     localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    setUsername("");
   };
+
 
   const sports = [
     { name: "Badminton", img: "/images/badminton.png", link: "/catalogue" },
@@ -96,15 +89,21 @@ export default function Home() {
        {isLoggedIn ? (
   <button onClick={handleProfileClick} className="flex items-center gap-2 cursor-pointer">
     <img
-      src={username?.profileImageUrl || "/avatars/default.png"}
+      src={user?.profileImageUrl || "/avatars/default.png"}
       alt="Profile"
       className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
       onError={(e) => { e.target.onerror = null; e.target.src="/avatars/default.png" }}
     />
   </button>
 ) : (
-  <button onClick={() => setAuthModalOpen(true)} className="px-4 py-1 rounded cursor-pointer bg-blue-600 text-white text-lg hover:bg-blue-500 transition whitespace-nowrap">Login / Sign Up</button>
+  <button
+    onClick={() => setAuthModalOpen(true)}
+    className="px-4 py-1 rounded cursor-pointer bg-blue-600 text-white text-lg hover:bg-blue-500 transition whitespace-nowrap"
+  >
+    Login / Sign Up
+  </button>
 )}
+
 
   
       </nav>
@@ -113,13 +112,14 @@ export default function Home() {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} isLoggedIn={isLoggedIn} />
 
       {/* Auth Modal */}
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} setIsLoggedIn={setIsLoggedIn} setUsername={setUsername} />
+     <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
+
 
       {/* Highlighted Quote */}
       <div className="bg-gray-900 py-4 text-center px-4">
         {isLoggedIn && (
           <p className="text-lg md:text-3xl font-semibold mb-2">
-            Hello, {username?.firstName || username || "Player"}!
+            Hello, {user?.firstName || user || "Player"}!
           </p>
         )}
         <p className="text-blue-100 font-semibold text-sm md:text-2xl animate-pulse">{quote}</p>

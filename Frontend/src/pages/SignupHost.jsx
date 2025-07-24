@@ -59,22 +59,20 @@ const handleVerifyOtp = async () => {
     const checkRes = await fetch(`http://localhost:5001/api/owner/check/${uid}`);
     const data = await checkRes.json();
 
-    if (data.exists) {
-      console.log("✅ Owner exists:", data.owner);
-      navigate("/turfownerdashboard");
-    } else {
-      console.log("🆕 New owner, proceed to profile creation.");
-      navigate("/account_setup_host");
-      localStorage.setItem("firebaseUid", uid);
-      setIsLoggedIn(true);
-    }
 
-  } catch (err) {
-    console.error("Error during OTP verification:", err);
-    alert("Something went wrong while verifying OTP. Please check console.");
+  if (res.data.exists) {
+    navigate("/turfownerdashboard");
+  } else {
+    navigate("/account_setup_host");
   }
-};
+} catch (err) {
+  console.error(err);
+  setError("OTP verification failed. Please try again.");
+} finally {
+  setIsLoading(false);
+}
 
+};
 
 
   return (

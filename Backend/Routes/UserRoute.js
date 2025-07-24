@@ -33,6 +33,8 @@ router.post("/loginOrRegister", async (req, res) => {
     }
 
     const token = generateToken({ id: user._id });
+    console.log("Generated JWT:", token);
+
 
     // 🔷 Check if profile is incomplete
     const needsProfile = !user.firstName || !user.gmail;
