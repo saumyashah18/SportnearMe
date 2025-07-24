@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-import { useState, useRef } from "react";
-=======
-// src/Hooks/useAuth.js
-
-import { useState, useEffect } from "react";
->>>>>>> a58d84997342470b81cc66de53a09a2d6fae1748
+import { useState, useRef, useEffect } from "react";
 import { RecaptchaVerifier, signInWithPhoneNumber, signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
@@ -72,60 +66,37 @@ export function useAuth() {
     }
 
     try {
-      const confirmation = await signInWithPhoneNumber(auth, `+91${phone}`, window.recaptchaVerifier);
-<<<<<<< HEAD
-      confirmationResultRef.current = confirmation; // store in ref
-      console.log("OTP sent successfully via Firebase.");
-=======
-      setConfirmationResult(confirmation);
-      console.log("✅ OTP sent successfully via Firebase.");
->>>>>>> a58d84997342470b81cc66de53a09a2d6fae1748
-      return { success: true };
-    } catch (err) {
-      console.error("❌ sendOtp error:", err);
-      return { success: false, error: err.message };
+    const confirmation = await signInWithPhoneNumber(auth, `+91${phone}`, window.recaptchaVerifier);
+    confirmationResultRef.current = confirmation; // store in ref
+    console.log("OTP sent successfully via Firebase.");
+    return { success: true };
+  } catch (err) {
+    console.error("OTP send error:", err);
+    return { success: false, error: err.message };
+  }
+};
+
+const verifyOtp = async (otp) => {
+  try {
+    if (!confirmationResultRef.current) {
+      throw new Error("OTP confirmation result is not available.");
     }
-  };
 
-  const verifyOtp = async (otp) => {
-    try {
-<<<<<<< HEAD
-      if (!confirmationResultRef.current) {
-        throw new Error("OTP confirmation result is not available.");
-      }
+    const result = await confirmationResultRef.current.confirm(otp);
+    const uid = result.user?.uid;
 
-      const result = await confirmationResultRef.current.confirm(otp);
-      const uid = result.user?.uid;
-
-      if (uid) {
-        setFirebaseUid(uid);
-        console.log("✅ OTP verified:", uid);
-        return uid;
-      } else {
-        throw new Error("User UID not found after OTP verification.");
-      }
-=======
-      const result = await confirmationResult.confirm(otp);
-      setFirebaseUid(result.user.uid);
-      console.log("✅ OTP verified, Firebase UID:", result.user.uid);
-      return result.user.uid;
->>>>>>> a58d84997342470b81cc66de53a09a2d6fae1748
-    } catch (err) {
-      console.error("❌ OTP verification failed:", err);
-      return null;
+    if (uid) {
+      setFirebaseUid(uid);
+      console.log("✅ OTP verified:", uid);
+      return uid;
+    } else {
+      throw new Error("User UID not found after OTP verification.");
     }
-<<<<<<< HEAD
-  };
-
-  const logout = async () => {
-    await signOut(auth);
-    setFirebaseUid(null);
-    console.log("Logged out successfully.");
-  };
-
-  return { sendOtp, verifyOtp, logout, firebaseUid };
-=======
-  };
+  } catch (err) {
+    console.error("❌ OTP verification failed:", err);
+    return null;
+  }
+};
 
   const logout = async () => {
     try {
@@ -151,5 +122,4 @@ export function useAuth() {
     setUser,        // expose for post-login profile updates
     setIsLoggedIn,  // expose for direct login state updates after login
   };
->>>>>>> a58d84997342470b81cc66de53a09a2d6fae1748
 }
