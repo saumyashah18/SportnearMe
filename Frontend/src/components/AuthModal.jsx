@@ -449,15 +449,16 @@ const uploadImageAndGetURL = async () => {
         {step === "success" && (
           <>
             <h2 className="text-center text-2xl font-bold mb-4">🎉 All Set!</h2>
-            <button
-              onClick={() => {
-                onClose();
-                navigate("/");
-              }}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 cursor-pointer"
-            >
-              Continue
-            </button>
+           <button
+  onClick={() => {
+    onClose();
+    window.location.href = "/";
+  }}
+  className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 cursor-pointer"
+>
+  Continue
+</button>
+
           </>
         )}
 
