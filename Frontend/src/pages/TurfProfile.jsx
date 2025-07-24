@@ -1,4 +1,3 @@
-// src/pages/TurfProfile.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -20,10 +19,10 @@ export default function TurfProfile() {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    const firebaseUid = localStorage.getItem("firebaseUid"); // assuming you store it after OTP login
+    const firebaseUid = localStorage.getItem("firebaseUid"); 
 
     if (!firebaseUid) {
-      navigate("/"); // or redirect to login
+      navigate("/"); 
       return;
     }
 

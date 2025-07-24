@@ -173,6 +173,15 @@ export default function DashboardHost() {
                     <option value="90">1.5 Hours</option>
                     <option value="120">2 Hours</option>
                   </select>
+                                    <input
+                    type="number"
+                    placeholder="Total Payable (₹)"
+                    value={sport.TotalPayable}
+                    onChange={(e) =>
+                      handleInputChange(index, "TotalPayable", e.target.value)
+                    }
+                    className="border p-2 rounded"
+                  />
 
                   <input
                     type="number"
