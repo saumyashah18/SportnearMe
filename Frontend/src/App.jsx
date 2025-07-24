@@ -10,6 +10,7 @@ import ConfirmBooking from "./pages/ConfirmBooking";
 import TurfOwnerDashboard from "./pages/TurfOwnerDashboard";
 import Profile from "./pages/Profile";
 import TurfProfile from "./pages/TurfProfile";
+import TurfDescription from "./pages/TurfDescription";   
 
 
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/confirmbooking" element={<ConfirmBooking />} />
         <Route path="/turfownerdashboard" element={<TurfOwnerDashboard />} />
         <Route path="/turf_profile" element={<TurfProfile />} />
+        <Route path="/turfdescription" element={<TurfDescription />} />
       </Routes>
     </Router>
   );

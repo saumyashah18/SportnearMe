@@ -1,17 +1,19 @@
 // src/pages/TurfProfile.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function TurfProfile() {
-  // Mock data — replace with actual fetch from DB or API
+  const navigate = useNavigate();
+
   const [profile, setProfile] = useState({
-    fullName: "Samzie Shah",
-    dob: "18/12/2004",
-    email: "s@gmail.com",
-    gender: "Female",
-    turfName: "City Sports Arena",
-    turfAddress: "123 Sports Lane, Mumbai",
-    turfDescription: "Premium turf for badminton, cricket, and more.",
-    turfLocationUrl: "https://maps.google.com/example",
+    // fullName: "Samzie Shah",
+    // dob: "18/12/2004",
+    // email: "s@gmail.com",
+    // gender: "Female",
+    // turfName: "City Sports Arena",
+    // turfAddress: "123 Sports Lane, Mumbai",
+    // turfDescription: "Premium turf for badminton, cricket, and more.",
+    // turfLocationUrl: "https://maps.google.com/example",
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -27,12 +29,25 @@ export default function TurfProfile() {
     setIsEditing(false);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/"); // Or navigate("/login") if you have a login route
+  };
+
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-6">
-      <h1 className="text-3xl font-bold mb-6">Turf Owner Profile</h1>
+      {/* Header with Logout */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Turf Owner Profile</h1>
+        <button
+          className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+      </div>
 
       <div className="bg-[#1e293b] p-6 rounded-xl space-y-6 max-w-3xl mx-auto shadow-md">
-
         {/* Owner Info */}
         <h2 className="text-2xl text-center font-semibold border-b pb-2 border-slate-600">Owner Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
