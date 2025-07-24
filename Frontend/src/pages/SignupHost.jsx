@@ -60,7 +60,7 @@ const handleVerifyOtp = async () => {
     const data = await checkRes.json();
 
 
-  if (res.data.exists) {
+  if (data.exists) {
     navigate("/turfownerdashboard");
   } else {
     navigate("/account_setup_host");
