@@ -182,9 +182,93 @@ const [availability, setAvailability] = useState({
                       handleInputChange(index, "advanceAmount", e.target.value)
                     }
                     className="border p-2 rounded"
+                    
                   />
+                   <input
+    type="number"
+    placeholder="Price Amount (₹)"
+    value={sport.priceAmount || ""}
+    onChange={(e) => handleInputChange(index, "priceAmount", e.target.value)}
+    className="border p-2 rounded w-full "
+  />
 
-                 
+                 {/* Weekly Availability */}
+  <div className="mb-4 col-span-2">
+    <label className="font-semibold block mb-2">Weekly Availability</label>
+    <label className="flex items-center gap-2 mb-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={availability.sameForAll}
+        onChange={(e) =>
+          setAvailability((prev) => ({
+            ...prev,
+            sameForAll: e.target.checked,
+          }))
+        }
+        className="cursor-pointer"
+      />
+      Same for all days
+    </label>
+
+    {availability.sameForAll ? (
+      <div className="flex gap-4 mb-4">
+        <input
+          type="time"
+          value={availability.defaultStart}
+          onChange={(e) =>
+            setAvailability((prev) => ({
+              ...prev,
+              defaultStart: e.target.value,
+            }))
+          }
+          className="border p-2 rounded"
+        />
+        <input
+          type="time"
+          value={availability.defaultEnd}
+          onChange={(e) =>
+            setAvailability((prev) => ({
+              ...prev,
+              defaultEnd: e.target.value,
+            }))
+          }
+          className="border p-2 rounded"
+        />
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 gap-4">
+        {Object.keys(availability.days).map((day) => (
+          <div key={day} className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={availability.days[day].open}
+              onChange={() => toggleDayOpen(day)}
+              className="cursor-pointer"
+            />
+            <label className="w-24 cursor-pointer">{day}</label>
+            <input
+              type="time"
+              disabled={!availability.days[day].open}
+              value={availability.days[day].start}
+              onChange={(e) =>
+                handleAvailabilityChange(day, "start", e.target.value)
+              }
+              className="border p-2 rounded flex-1"
+            />
+            <input
+              type="time"
+              disabled={!availability.days[day].open}
+              value={availability.days[day].end}
+              onChange={(e) =>
+                handleAvailabilityChange(day, "end", e.target.value)
+              }
+              className="border p-2 rounded flex-1"
+            />
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
 
                   {sports.length > 1 && (
                     <button
