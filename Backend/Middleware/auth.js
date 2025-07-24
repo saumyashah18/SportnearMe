@@ -8,6 +8,8 @@ const auth = (req, res, next) => {
   }
 
   try {
+    console.log("JWT_SECRET at verifyToken:", process.env.JWT_SECRET);
+    console.log("JWT received for verification:", token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
@@ -18,6 +20,7 @@ const auth = (req, res, next) => {
 };
 
 const generateToken = (payload) => {
+  console.log("JWT_SECRET at generateToken:", process.env.JWT_SECRET);
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 

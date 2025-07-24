@@ -7,6 +7,7 @@ import { auth } from "../firebase";
 import { useEffect } from "react";
 import { storage } from "../firebase";
 
+
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState("");
@@ -20,9 +21,9 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [selectedSports, setSelectedSports] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const {  user, logout, loading, sendOtp, verifyOtp, firebaseUid, setUser } = useAuth();
 
 
-  const { sendOtp, verifyOtp, firebaseUid } = useAuth();
   const navigate = useNavigate();
 
   const handleSendOtp = async () => {
@@ -71,9 +72,16 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
       return;
     }
     localStorage.setItem("token", data.token);
+    if (res.ok) {
+  console.log("✅ Token stored in localStorage after login:", data.token);
+} else {
+  console.error("❌ Login failed:", data.message);
+}
+setUser(data.user);
+console.log("✅ User logged in, token stored, user state set.");
+
     if (data.needsProfile) setStep("name");
     else {
-      setIsLoggedIn(true);
       setStep("success");
     }
   };
@@ -94,29 +102,34 @@ const uploadImageAndGetURL = async () => {
   return url;
 };
 
+const handleCompleteProfile = async () => {
+  const imageUrl = await uploadImageAndGetURL();
 
-  const handleCompleteProfile = async () => {
-    const imageUrl = await uploadImageAndGetURL();
+  const token = localStorage.getItem("token");
+  console.log("Token before sending to /completeProfile:", token);
+    if (!token) {
+      console.error("❌ No token found in localStorage. User might not be logged in.");
+      return;
+    }
 
-    const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:5001/api/users/completeProfile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+  const res = await fetch("http://localhost:5001/api/users/completeProfile", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
       body: JSON.stringify({
         firstName,
         lastName,
         gender,
         gmail,
-        phone,
         selectedSports,
         profileImageUrl: imageUrl,
       }),
     });
 
     const data = await res.json();
+
     if (!res.ok) {
       alert(data.message || "Profile completion failed");
       return;
@@ -127,8 +140,10 @@ const uploadImageAndGetURL = async () => {
   localStorage.setItem("profileImage", imageUrl);
 }
 
-    setIsLoggedIn(true);
+  
     setStep("success");
+
+
   };
 
   const toggleSport = (sport) => {

@@ -64,7 +64,6 @@ export default function SignupHost() {
 } finally {
   setIsLoading(false);
 }
-
 };
 
 
