@@ -1,12 +1,8 @@
-// src/pages/owner/SignupHost.jsx
-
 import React, { useState, useRef } from "react";
 import { useAuth } from "../Hooks/useAuth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./SignupHost.css"; // your flip animation
-
-
+import "./SignupHost.css";
 
 export default function SignupHost() {
   const { sendOtp, verifyOtp } = useAuth();
@@ -18,8 +14,8 @@ export default function SignupHost() {
   const [error, setError] = useState("");
   const inputsRef = useRef([]);
   const navigate = useNavigate();
-
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
 
   const handleSendOtp = async () => {
     setError("");
@@ -27,6 +23,7 @@ export default function SignupHost() {
       setError("Enter a valid 10-digit mobile number.");
       return;
     }
+
     try {
       setIsLoading(true);
       const result = await sendOtp(phone);
@@ -34,43 +31,55 @@ export default function SignupHost() {
       setIsFlipped(true);
     } catch (err) {
       console.error(err);
-      setError("Failed to send OTP. Please try again.");
+      setError("Failed to send OTP. Try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerifyOtp = async () => {
-    setError("");
-    const combinedOtp = otpDigits.join("");
-    if (!/^\d{6}$/.test(combinedOtp)) {
-      setError("Enter a valid 6-digit OTP.");
+const handleVerifyOtp = async () => {
+  const otp = otpDigits.join("");  // <-- Fix: Combine digit inputs
+
+  if (!otp || typeof otp !== "string" || otp.length !== 6) {
+    alert("Please enter a valid 6-digit OTP");
+    console.log("Hit /check route with UID:", uid);
+    return;
+  }
+
+  try {
+    console.log("Verifying OTP:", otp);
+    const uid = await verifyOtp(String(otp)); // Force it to string
+
+    if (!uid) {
+      alert("OTP verification failed. Please try again.");
       return;
     }
-    try {
-  setIsLoading(true);
 
- const res = await axios.post("http://localhost:5001/api/owner/auth/check-owner", { phone });
+    // Check if owner already exists
+    const checkRes = await fetch(`http://localhost:5001/api/owner/check/${uid}`);
+    const data = await checkRes.json();
 
+    if (data.exists) {
+      console.log("✅ Owner exists:", data.owner);
+      navigate("/turfownerdashboard");
+    } else {
+      console.log("🆕 New owner, proceed to profile creation.");
+      navigate("/account_setup_host");
+      localStorage.setItem("firebaseUid", uid);
+      setIsLoggedIn(true);
+    }
 
-  if (res.data.exists) {
-    navigate("/turfownerdashboard");
-  } else {
-    navigate("/account_setup_host");
+  } catch (err) {
+    console.error("Error during OTP verification:", err);
+    alert("Something went wrong while verifying OTP. Please check console.");
   }
-} catch (err) {
-  console.error(err);
-  setError("OTP verification failed. Please try again.");
-} finally {
-  setIsLoading(false);
-}
-
 };
+
 
 
   return (
     <div className="h-screen w-full flex flex-col md:flex-row bg-gradient-to-r from-[#0f172a] to-[#1e293b] text-slate-200">
-      {/* LEFT: Benefits */}
+      {/* LEFT */}
       <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
         <h1 className="text-2xl md:text-3xl font-bold mb-8 text-white">
           Benefits of listing your ground with SportnearMe
@@ -104,27 +113,26 @@ export default function SignupHost() {
         </div>
       </div>
 
-      {/* RIGHT: Flip Card */}
+      {/* RIGHT */}
       <div className="w-full md:w-1/2 bg-[#1e293b] flex flex-col justify-center items-center p-8">
         <div className={`relative w-full max-w-sm h-[400px] flip-card ${isFlipped ? "flipped" : ""}`}>
           <div className="flip-inner">
-
-            {/* FRONT: Phone Number Entry */}
+            {/* FRONT: Enter phone */}
             <div className="flip-front bg-[#0f172a] text-white p-6 rounded shadow-md">
               <div className="flex items-center justify-center mb-4">
                 <img src="/images/logo.jpeg" className="w-6 h-6 mr-2" alt="Logo" />
                 <h2 className="text-lg font-semibold">SportnearMe GroundUp</h2>
-              </div >
+              </div>
               <label className="block text-center mb-2">Mobile Number</label>
               <div className="border border-gray-600 px-3 py-2 rounded flex items-center gap-2 bg-gray-900">
-                 🇮🇳 +91
-              <input
-                type="tel"
-                placeholder="Enter your mobile no"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-slate-500 bg-transparent text-white rounded px-3 py-2 focus:outline-blue-500"
-              />
+                🇮🇳 +91
+                <input
+                  type="tel"
+                  placeholder="Enter your mobile no"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full border border-slate-500 bg-transparent text-white rounded px-3 py-2 focus:outline-blue-500"
+                />
               </div>
               <button
                 onClick={handleSendOtp}
@@ -137,7 +145,7 @@ export default function SignupHost() {
               <div id="recaptcha-container"></div>
             </div>
 
-            {/* BACK: OTP Verification with 6 Boxes */}
+            {/* BACK: Enter OTP */}
             <div className="flip-back bg-[#0f172a] text-white p-6 rounded shadow-md">
               <div className="flex items-center justify-center mb-4">
                 <img src="/images/logo.jpeg" className="w-6 h-6 mr-2" alt="Logo" />
@@ -158,9 +166,7 @@ export default function SignupHost() {
                         const newOtp = [...otpDigits];
                         newOtp[idx] = val;
                         setOtpDigits(newOtp);
-                        if (idx < 5) {
-                          inputsRef.current[idx + 1]?.focus();
-                        }
+                        if (idx < 5) inputsRef.current[idx + 1]?.focus();
                       }
                     }}
                     onKeyDown={(e) => {
@@ -187,7 +193,6 @@ export default function SignupHost() {
                 </button>
               </p>
             </div>
-
           </div>
         </div>
       </div>

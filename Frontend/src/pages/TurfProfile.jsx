@@ -1,42 +1,76 @@
 // src/pages/TurfProfile.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function TurfProfile() {
   const navigate = useNavigate();
-
   const [profile, setProfile] = useState({
-    // fullName: "Samzie Shah",
-    // dob: "18/12/2004",
-    // email: "s@gmail.com",
-    // gender: "Female",
-    // turfName: "City Sports Arena",
-    // turfAddress: "123 Sports Lane, Mumbai",
-    // turfDescription: "Premium turf for badminton, cricket, and more.",
-    // turfLocationUrl: "https://maps.google.com/example",
+    firebaseUid: "",
+    phone: "",
+    name: "",
+    dob: "",
+    email: "",
+    gender: "",
+    turfName: "",
+    turfAddress: "",
+    turfDescription: "",
+    turfLocationUrl: ""
   });
 
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    const firebaseUid = localStorage.getItem("firebaseUid"); // assuming you store it after OTP login
+
+    if (!firebaseUid) {
+      navigate("/"); // or redirect to login
+      return;
+    }
+
+    setProfile((prev) => ({ ...prev, firebaseUid }));
+
+    // Fetch profile
+    fetch(`http://localhost:5001/api/owner/profile/${firebaseUid}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Profile not found");
+        return res.json();
+      })
+      .then((data) => {
+        setProfile(data);
+      })
+      .catch((err) => {
+        console.log("Profile fetch error:", err.message);
+      });
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    // Save the profile to backend or localStorage
-    console.log("Saved profile:", profile);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/owner/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile)
+      });
+
+      const data = await res.json();
+      console.log("Saved profile:", data);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Save error:", err);
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/"); // Or navigate("/login") if you have a login route
+    localStorage.removeItem("firebaseUid");
+    navigate("/");
   };
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white p-6">
-      {/* Header with Logout */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Turf Owner Profile</h1>
         <button
@@ -53,9 +87,9 @@ export default function TurfProfile() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             className="p-2 rounded bg-[#0f172a] border border-slate-700"
-            name="fullName"
+            name="name"
             placeholder="Owner's Full Name"
-            value={profile.fullName}
+            value={profile.name}
             disabled={!isEditing}
             onChange={handleChange}
           />

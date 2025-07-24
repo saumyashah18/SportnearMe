@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const ownerRoutes = require("./Routes/Owner");
 
 // Load .env
 dotenv.config();
@@ -23,6 +24,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/users", userRoute);
+app.use("/api/owner", ownerRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("✅ SportNearMe Backend is running!");
