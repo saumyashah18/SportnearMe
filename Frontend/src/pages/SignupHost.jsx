@@ -14,8 +14,6 @@ export default function SignupHost() {
   const [error, setError] = useState("");
   const inputsRef = useRef([]);
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
 
   const handleSendOtp = async () => {
     setError("");
@@ -37,43 +35,55 @@ export default function SignupHost() {
     }
   };
 
-const handleVerifyOtp = async () => {
-  const otp = otpDigits.join("");  // <-- Fix: Combine digit inputs
+  const handleVerifyOtp = async () => {
+    const otp = otpDigits.join("");
 
-  if (!otp || typeof otp !== "string" || otp.length !== 6) {
-    alert("Please enter a valid 6-digit OTP");
-    console.log("Hit /check route with UID:", uid);
-    return;
-  }
-
-  try {
-    console.log("Verifying OTP:", otp);
-    const uid = await verifyOtp(String(otp)); // Force it to string
-
-    if (!uid) {
-      alert("OTP verification failed. Please try again.");
+    if (!otp || typeof otp !== "string" || otp.length !== 6) {
+      alert("Please enter a valid 6-digit OTP");
       return;
     }
 
-    // Check if owner already exists
-    const checkRes = await fetch(`http://localhost:5001/api/owner/check/${uid}`);
-    const data = await checkRes.json();
+    try {
+      setIsLoading(true);
+      const user = await verifyOtp(String(otp));
+      const uid = user?.uid;
+      localStorage.setItem("firebaseUid", uid);
 
+      if (!uid) {
+        alert("OTP verification failed. Please try again.");
+        return;
+      }
 
-  if (data.exists) {
-    navigate("/turfownerdashboard");
-  } else {
-    navigate("/account_setup_host");
-  }
-} catch (err) {
-  console.error(err);
-  setError("OTP verification failed. Please try again.");
-} finally {
-  setIsLoading(false);
-}
+      const checkRes = await fetch(`http://localhost:5001/api/owner/check/${uid}`);
+      const data = await checkRes.json();
 
-};
+      if (!data.exists) {
+        const createRes = await fetch("http://localhost:5001/api/owner/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ firebaseUid: uid, phone }),
+        });
 
+        if (!createRes.ok) {
+          alert("Failed to create owner profile.");
+          return;
+        }
+      }
+
+      if (data.exists) {
+        navigate("/turfownerdashboard");
+      } else {
+        navigate("/account_setup_host");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("OTP verification failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen w-full flex flex-col md:flex-row bg-gradient-to-r from-[#0f172a] to-[#1e293b] text-slate-200">
@@ -129,13 +139,16 @@ const handleVerifyOtp = async () => {
                   placeholder="Enter your mobile no"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSendOtp();
+                  }}
                   className="w-full border border-slate-500 bg-transparent text-white rounded px-3 py-2 focus:outline-blue-500"
                 />
               </div>
               <button
                 onClick={handleSendOtp}
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded py-2 mt-4 transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded py-2 mt-4 transition cursor-pointer"
               >
                 {isLoading ? "Sending OTP..." : "Send OTP"}
               </button>
@@ -168,8 +181,19 @@ const handleVerifyOtp = async () => {
                       }
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === "Backspace" && !otpDigits[idx] && idx > 0) {
-                        inputsRef.current[idx - 1]?.focus();
+                      const newOtp = [...otpDigits];
+                      if (e.key === "Backspace") {
+                        e.preventDefault();
+                        if (otpDigits[idx]) {
+                          newOtp[idx] = "";
+                          setOtpDigits(newOtp);
+                        } else if (idx > 0) {
+                          inputsRef.current[idx - 1]?.focus();
+                          newOtp[idx - 1] = "";
+                          setOtpDigits(newOtp);
+                        }
+                      } else if (e.key === "Enter" && idx === 5) {
+                        handleVerifyOtp();
                       }
                     }}
                     className="w-10 h-12 text-center text-lg border border-slate-500 bg-transparent text-white rounded focus:outline-blue-500"
@@ -179,14 +203,14 @@ const handleVerifyOtp = async () => {
               <button
                 onClick={handleVerifyOtp}
                 disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded py-2 mb-4 transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded py-2 mb-4 transition cursor-pointer"
               >
                 {isLoading ? "Verifying..." : "Verify OTP"}
               </button>
               {error && <p className="text-red-400 text-sm mt-2 text-center">{error}</p>}
               <p className="text-sm text-center text-slate-400">
                 Entered wrong number?{" "}
-                <button onClick={() => setIsFlipped(false)} className="text-blue-400 underline">
+                <button onClick={() => setIsFlipped(false)} className="text-blue-400 underline cursor-pointer">
                   Go Back
                 </button>
               </p>

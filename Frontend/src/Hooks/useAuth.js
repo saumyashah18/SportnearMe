@@ -83,12 +83,12 @@ const verifyOtp = async (otp) => {
     }
 
     const result = await confirmationResultRef.current.confirm(otp);
-    const uid = result.user?.uid;
+    const user = result.user;
 
-    if (uid) {
-      setFirebaseUid(uid);
-      console.log("✅ OTP verified:", uid);
-      return uid;
+    if (user?.uid) {
+      setFirebaseUid(user.uid);
+      console.log("✅ OTP verified:", user.uid);
+      return user; // ✅ return full user object
     } else {
       throw new Error("User UID not found after OTP verification.");
     }

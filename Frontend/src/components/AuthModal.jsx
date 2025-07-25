@@ -123,6 +123,7 @@ const handleCompleteProfile = async () => {
         lastName,
         gender,
         gmail,
+        phone,
         selectedSports,
         profileImageUrl: imageUrl,
       }),

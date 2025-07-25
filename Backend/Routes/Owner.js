@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const TurfOwner = require("../models/TurfOwner"); // Adjust path as needed
+const TurfOwner = require("../models/TurfOwner"); // Adjust path if needed
 
-// ✅ Create or Update TurfOwner Profile
+// ✅ Create or Update Full TurfOwner Profile (from form)
 router.post("/profile", async (req, res) => {
   const {
     firebaseUid,
@@ -59,24 +59,73 @@ router.post("/profile", async (req, res) => {
   }
 });
 
-// Check if TurfOwner exists by Firebase UID
-router.get("/check/:uid", async (req, res) => {
-  const { uid } = req.params;
+// ✅ Basic Create for OTP step (just firebaseUid and phone)
+router.post("/create", async (req, res) => {
+  const { firebaseUid, phone } = req.body;
+
+  if (!firebaseUid || !phone) {
+    return res.status(400).json({ error: "UID and phone required." });
+  }
 
   try {
-    const owner = await TurfOwner.findOne({ firebaseUid: uid });
-
-    if (owner) {
-      return res.status(200).json({ exists: true, owner });
-    } else {
-      return res.status(200).json({ exists: false });
+    const existingOwner = await TurfOwner.findOne({ firebaseUid });
+    if (existingOwner) {
+      return res.status(200).json({ exists: true, owner: existingOwner });
     }
-  } catch (error) {
-    console.error("Error checking owner existence:", error);
-    res.status(500).json({ error: "Server error" });
+
+    const newOwner = new TurfOwner({ firebaseUid, phone });
+    await newOwner.save();
+
+    return res.status(201).json({ message: "Owner created", owner: newOwner });
+  } catch (err) {
+    console.error("Error creating owner:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
+router.post("/profile", async (req, res) => {
+  const {
+    firebaseUid,
+    phone,
+    name,
+    dob,
+    email,
+    gender,
+    turfName,
+    turfAddress,
+    turfDescription,
+    turfLocationUrl
+  } = req.body;
+
+  if (!firebaseUid) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const updatedOwner = await Owner.findOneAndUpdate(
+      { firebaseUid },
+      {
+        phone,
+        name,
+        dob,
+        email,
+        gender,
+        turfName,
+        turfAddress,
+        turfDescription,
+        turfLocationUrl,
+      },
+      { new: true, upsert: true }
+    );
+
+    res.status(200).json(updatedOwner);
+  } catch (err) {
+    console.error("Error updating owner profile:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ Check if TurfOwner exists by Firebase UID
 router.get("/check/:uid", async (req, res) => {
   const { uid } = req.params;
 
@@ -93,5 +142,24 @@ router.get("/check/:uid", async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 });
+
+// ✅ Get profile by Firebase UID
+router.get("/profile/:firebaseUid", async (req, res) => {
+  const { firebaseUid } = req.params;
+
+  try {
+    const owner = await TurfOwner.findOne({ firebaseUid });
+
+    if (!owner) {
+      return res.status(404).json({ error: "Owner not found" });
+    }
+
+    res.status(200).json(owner);
+  } catch (error) {
+    console.error("Error fetching owner profile:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 module.exports = router;
