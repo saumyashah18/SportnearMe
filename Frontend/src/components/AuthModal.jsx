@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import sportsData from "../data/sportsData";
-import { useAuth } from "../Hooks/useAuth";
+import useCustomerAuth from "../Hooks/useCustomerAuth";
 import { useNavigate } from "react-router-dom";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth } from "../firebase";
@@ -21,7 +21,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   const [selectedSports, setSelectedSports] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-  const {  user, logout, loading, sendOtp, verifyOtp, firebaseUid, setUser } = useAuth();
+  const {  user, logout, loading, sendOtp, verifyOtp, firebaseUid, setUser } = useCustomerAuth();
 
 
   const navigate = useNavigate();
@@ -55,36 +55,39 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
   };
 
   const handleVerifyOtp = async () => {
-    const otp = otpDigits.join("");
-    const uid = await verifyOtp(otp);
-    if (!uid) {
-      alert("OTP verification failed.");
-      return;
-    }
-    const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ firebaseUid: uid, phone }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message || "Login failed");
-      return;
-    }
-    localStorage.setItem("token", data.token);
-    if (res.ok) {
-  console.log("✅ Token stored in localStorage after login:", data.token);
-} else {
-  console.error("❌ Login failed:", data.message);
-}
-setUser(data.user);
-console.log("✅ User logged in, token stored, user state set.");
+  const otp = otpDigits.join("");
 
-    if (data.needsProfile) setStep("name");
-    else {
-      setStep("success");
-    }
-  };
+  const verified = await verifyOtp(otp);
+  if (!verified) {
+    alert("OTP verification failed.");
+    return;
+  }
+
+  const { uid, phoneNumber } = verified;
+
+  const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ firebaseUid: uid, phone: phoneNumber }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.message || "Login failed");
+    return;
+  }
+
+  localStorage.setItem("token", data.token);
+  console.log("✅ Token stored in localStorage after login:", data.token);
+
+  setUser(data.user);
+  console.log("✅ User logged in, token stored, user state set.");
+
+  if (data.needsProfile) setStep("name");
+  else setStep("success");
+};
+
 
 const uploadImageAndGetURL = async () => {
   if (!profileImage) return null;

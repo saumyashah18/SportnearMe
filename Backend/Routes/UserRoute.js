@@ -7,8 +7,10 @@ const router = express.Router();
 // 🔷 loginOrRegister
 router.post("/loginOrRegister", async (req, res) => {
   const { firebaseUid, phone } = req.body;
+  console.log("📩 Incoming login request", { firebaseUid, phone }); 
 
   if (!firebaseUid || !phone) {
+    console.warn("⚠️ Missing firebaseUid or phone in request body");
     return res
       .status(400)
       .json({ message: "firebaseUid and phone are required" });
@@ -19,6 +21,7 @@ router.post("/loginOrRegister", async (req, res) => {
 
     if (!user) {
       // 🔷 If no user found with firebaseUid, check by phone
+      console.log("ℹ️ No user found by firebaseUid, checking phone...");
       user = await User.findOne({ phone });
 
       if (user) {
@@ -26,6 +29,7 @@ router.post("/loginOrRegister", async (req, res) => {
         user.firebaseUid = firebaseUid;
         await user.save();
       } else {
+         console.log("🆕 Creating new user");
         // 🔷 Neither firebaseUid nor phone found — create new user
         user = new User({ firebaseUid, phone });
         await user.save();

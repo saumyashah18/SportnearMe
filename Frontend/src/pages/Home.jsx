@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AuthModal from "../components/AuthModal";
-import { useAuth } from "../Hooks/useAuth";
+import useCustomerAuth from "../Hooks/useCustomerAuth";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../pages/Sidebar";
 import { Menu } from "lucide-react";
@@ -12,7 +12,7 @@ export default function Home() {
   const [quote, setQuote] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, user, logout , setUser, setIsLoggedIn  } = useCustomerAuth();
   const navigate = useNavigate();
   
 
@@ -103,16 +103,23 @@ export default function Home() {
     Login / Sign Up
   </button>
 )}
-
-
-  
       </nav>
 
       {/* Sidebar for Mobile */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} isLoggedIn={isLoggedIn} />
 
       {/* Auth Modal */}
-     <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
+     <AuthModal
+  isOpen={isAuthModalOpen}
+  onClose={() => setAuthModalOpen(false)}
+  onLoginSuccess={(userData) => {
+    localStorage.setItem("token", userData.token); 
+    setUser(userData.user);             // ✅ set global context
+    setIsLoggedIn(true);                // ✅ logged in
+  }}
+/>
+
+
 
 
       {/* Highlighted Quote */}

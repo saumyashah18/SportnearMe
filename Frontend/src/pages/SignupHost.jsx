@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
-import { useAuth } from "../Hooks/useAuth";
+import useHostAuth from "../Hooks/useHostAuth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./SignupHost.css";
 
 export default function SignupHost() {
-  const { sendOtp, verifyOtp } = useAuth();
+  const { sendOtp, verifyOtp } = useHostAuth();
   const [isFlipped, setIsFlipped] = useState(false);
   const [phone, setPhone] = useState("");
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);

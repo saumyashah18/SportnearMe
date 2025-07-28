@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Calendar, CreditCard, User2, Mail, Gift } from "lucide-react";
+import useCustomerAuth from "../Hooks/useCustomerAuth";
+
 
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const { setUser: setGlobalUser, setIsLoggedIn } = useCustomerAuth();
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -25,8 +29,11 @@ export default function Profile() {
         if (!res.ok) throw new Error("Failed to fetch profile");
 
         const data = await res.json();
-        setUser(data.user);
-        localStorage.setItem("user", JSON.stringify(data.user));
+setUser(data.user); // local profile state
+setGlobalUser(data.user); // 🔥 update global auth context
+setIsLoggedIn(true);
+localStorage.setItem("user", JSON.stringify(data.user));
+
       } catch (err) {
         console.error(err);
         navigate("/");
