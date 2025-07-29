@@ -14,7 +14,7 @@ export function useHostAuth() {
       const token = localStorage.getItem("hostToken");
       if (token) {
         try {
-          const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/owner/me`, {
+          const res = await fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/api/owner/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

@@ -19,7 +19,7 @@ export default function Profile() {
       }
 
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/users/me`, {
+        const res = await fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/api/users/me`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

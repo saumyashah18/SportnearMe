@@ -29,7 +29,7 @@ export default function TurfProfile() {
     setProfile((prev) => ({ ...prev, firebaseUid }));
 
     // Fetch profile
-    fetch(`${process.env.REACT_APP_API_BASE_URL}/api/owner/profile/${firebaseUid}`)
+    fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/api/owner/profile/${firebaseUid}`)
       .then((res) => {
         if (!res.ok) throw new Error("Profile not found");
         return res.json();
@@ -49,7 +49,7 @@ export default function TurfProfile() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/owner/profile`, {
+      const res = await fetch(`${import.meta.env.VITE_APP_API_BASE_URL}/api/owner/profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile)
