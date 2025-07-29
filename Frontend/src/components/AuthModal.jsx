@@ -6,6 +6,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth } from "../firebase";
 import { useEffect } from "react";
 import { storage } from "../firebase";
+import api from "../api";
 
 
 export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
@@ -65,7 +66,7 @@ export default function AuthModal({ isOpen, onClose, setIsLoggedIn }) {
 
   const { uid, phoneNumber } = verified;
 
-  const res = await fetch("http://localhost:5001/api/users/loginOrRegister", {
+  const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}api/users/loginOrRegister`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ firebaseUid: uid, phone: phoneNumber }),
@@ -115,7 +116,7 @@ const handleCompleteProfile = async () => {
       return;
     }
 
-  const res = await fetch("http://localhost:5001/api/users/completeProfile", {
+  const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/users/completeProfile`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

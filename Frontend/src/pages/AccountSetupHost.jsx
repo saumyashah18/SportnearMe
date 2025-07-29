@@ -38,7 +38,7 @@ const AccountSetupHost = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:5001/api/owner/profile", {
+      const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/owner/profile`, {
         firebaseUid,
         ...formData,
       });

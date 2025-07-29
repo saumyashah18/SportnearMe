@@ -14,7 +14,7 @@ export function useCustomerAuth() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const res = await fetch("http://localhost:5001/api/users/me", {
+          const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/users/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

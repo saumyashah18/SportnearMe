@@ -13,6 +13,7 @@ const userRoute = require("./Routes/UserRoute");
 
 const app = express();
 
+
 // Middleware
 app.use(cors({
   origin: "http://localhost:5173",
@@ -21,6 +22,19 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const allowedOrigins = [
+  'http://localhost:5173',                     // Vite dev server
+  'https://sportnear-be4k5ffhn-saumyashah18s-projects.vercel.app',         // your Vercel domain
+  'https://sportnearme.onrender.com'  // (optional) internal calls
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true, // only if you’re sending cookies
+  })
+);
 
 // Routes
 app.use("/api/users", userRoute);

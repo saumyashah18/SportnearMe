@@ -54,11 +54,11 @@ export default function SignupHost() {
         return;
       }
 
-      const checkRes = await fetch(`http://localhost:5001/api/owner/check/${uid}`);
+      const checkRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/owner/check/${uid}`);
       const data = await checkRes.json();
 
       if (!data.exists) {
-        const createRes = await fetch("http://localhost:5001/api/owner/create", {
+        const createRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/owner/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
