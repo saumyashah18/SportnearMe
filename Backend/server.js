@@ -24,15 +24,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
-  'http://localhost:5173',                     // Vite dev server
-  'https://sportnear-be4k5ffhn-saumyashah18s-projects.vercel.app',         // your Vercel domain
-  'https://sportnearme.onrender.com'  // (optional) internal calls
+  "http://localhost:5173",
+  "https://sportnear-me-git-main-saumyashah18s-projects.vercel.app",
+  "https://sportnearme.onrender.com",
 ];
 
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true, // only if you’re sending cookies
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
 
