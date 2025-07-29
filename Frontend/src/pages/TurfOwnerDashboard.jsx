@@ -62,7 +62,7 @@ export default function TurfOwnerDashboard() {
         <h1 className="text-2xl font-bold">Owner Console</h1>
         <nav className="space-y-2">
           <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Dashboard</a>
-          <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Bookings</a>
+          <a href="/owner_bookings" className="block p-2 rounded hover:bg-[#334155] cursor-pointer"> Turf Bookings</a>
           <a href="/manage-turf" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Manage Turf</a>
           <a href="/turf_profile" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">  My Profile</a>
           <a href="#" className="block p-2 rounded hover:bg-[#334155] cursor-pointer">Revenue</a>

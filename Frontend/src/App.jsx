@@ -12,7 +12,7 @@ import Profile from "./pages/Profile";
 import TurfProfile from "./pages/TurfProfile";
 import TurfDescription from "./pages/TurfDescription";   
 import ManageTurf from "./pages/ManageTurf";
-
+import OwnerBooking from "./pages/OwnerBooking";  
 
 
 function App() {
@@ -31,6 +31,7 @@ function App() {
         <Route path="/turf_profile" element={<TurfProfile />} />
         <Route path="/turfdescription" element={<TurfDescription />} />
         <Route path="/manageturf" element={<ManageTurf />} />
+         <Route path="/owner_bookings" element={<OwnerBooking />} />
 
       </Routes>
     </Router>
