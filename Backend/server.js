@@ -2,15 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+
 const ownerRoutes = require("./Routes/Owner");
+const userRoute = require("./Routes/UserRoute");
+const turfRoutes = require("./Routes/TurfRoute"); // ✅ Add this line
 
 // Load .env
-dotenv.config();
-
-// Import routes
-const userRoute = require("./Routes/UserRoute");
-
-// Load .env variables
 dotenv.config();
 
 const app = express();
@@ -44,8 +41,9 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ Routes
 app.use("/api/users", userRoute);
 app.use("/api/owner", ownerRoutes);
+app.use("/api/turfs", turfRoutes); // ✅ Mount turf routes here
 
-
+// ✅ Root route
 app.get("/", (req, res) => {
   res.send("✅ SportNearMe Backend is running!");
 });

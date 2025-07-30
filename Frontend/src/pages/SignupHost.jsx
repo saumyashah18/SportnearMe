@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import useHostAuth from "../hooks/useHostAuth";
+import useHostAuth from "../Hooks/useHostAuth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./SignupHost.css";

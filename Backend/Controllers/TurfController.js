@@ -18,10 +18,10 @@ const createTurf = async (req, res) => {
 
     if (!uid || !name || !sports || !Array.isArray(sports) || sports.length === 0) {
       console.warn("⚠️ Missing or invalid fields:", {
-        ownerType: typeof owner,
-        nameType: typeof name,
-        sportsType: typeof sports,
-        sportsLength: sports?.length,
+        uidType: typeof uid,
+  nameType: typeof name,
+  sportsType: typeof sports,
+  sportsLength: sports?.length,
       });
       return res.status(400).json({ error: "Required fields missing or malformed" });
     }

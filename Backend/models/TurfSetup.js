@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const turfSchema = new mongoose.Schema({
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: "Owner", required: true },
+  uid : { type: mongoose.Schema.Types.ObjectId, required: true },
 
   name: { type: String, required: true },
   address: { type: String },

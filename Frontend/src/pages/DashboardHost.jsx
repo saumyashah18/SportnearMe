@@ -23,7 +23,6 @@ export default function DashboardHost() {
         console.error("❌ Failed to fetch owner data:", error);
       }
     }
-
     fetchOwnerData();
   }, []);
 
@@ -219,7 +218,7 @@ const handlePublish = async () => {
 
     console.log("🚀 Final Payload Sent to Backend:", data);
 
-    const res = await axios.post("http://localhost:5001/api/turfs/setup", data);
+    const res = await axios.post( `${import.meta.env.VITE_APP_API_BASE_URL}/api/turfs/setup`, data);
     console.log("✅ Turf created:", res.data);
 
     navigate("/turfownerdashboard");
