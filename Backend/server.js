@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const ownerRoutes = require("./Routes/Owner");
+const turfRoutes = require("./Routes/TurfRoute");
 
 // Load .env
 dotenv.config();
@@ -25,6 +26,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/users", userRoute);
 app.use("/api/owner", ownerRoutes);
+app.use("/api/turfs", turfRoutes);
+
 
 
 app.get("/", (req, res) => {

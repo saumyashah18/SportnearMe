@@ -1,7 +1,34 @@
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { storage } from "../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+
 
 export default function DashboardHost() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchOwnerData() {
+      try {
+        const uid = localStorage.getItem("firebaseUid");
+        if (!uid) {
+          console.error("❌ UID missing in localStorage");
+          return;
+        }
+
+        const response = await axios.get(`/api/owners/profile/${uid}`);
+      } catch (error) {
+        console.error("❌ Failed to fetch owner data:", error);
+      }
+    }
+
+    fetchOwnerData();
+  }, []);
+
+    
+
   const [sports, setSports] = useState([
     {
       sport: "",
@@ -12,25 +39,26 @@ export default function DashboardHost() {
       advanceAmount: "",
     },
   ]);
+
+  const [availability, setAvailability] = useState({
+    sameForAll: true,
+    defaultStart: "",
+    defaultEnd: "",
+    days: {
+      Monday: { open: false, start: "", end: "" },
+      Tuesday: { open: false, start: "", end: "" },
+      Wednesday: { open: false, start: "", end: "" },
+      Thursday: { open: false, start: "", end: "" },
+      Friday: { open: false, start: "", end: "" },
+      Saturday: { open: false, start: "", end: "" },
+      Sunday: { open: false, start: "", end: "" },
+    },
+  });
+
   const [showBack, setShowBack] = useState(false);
   const [primaryImage, setPrimaryImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
-
-const [availability, setAvailability] = useState({
-  sameForAll: true,
-  defaultStart: "",
-  defaultEnd: "",
-  days: {
-    Monday: { open: false, start: "", end: "" },
-    Tuesday: { open: false, start: "", end: "" },
-    Wednesday: { open: false, start: "", end: "" },
-    Thursday: { open: false, start: "", end: "" },
-    Friday: { open: false, start: "", end: "" },
-    Saturday: { open: false, start: "", end: "" },
-    Sunday: { open: false, start: "", end: "" },
-  },
-});
 
   const amenities = [
     "Parking",
@@ -42,12 +70,14 @@ const [availability, setAvailability] = useState({
     "First Aid",
   ];
 
+  // Toggle Amenity Selection
   const toggleAmenity = (item) => {
     setSelectedAmenities((prev) =>
       prev.includes(item) ? prev.filter((a) => a !== item) : [...prev, item]
     );
   };
 
+  // Toggle a Day's Availability
   const toggleDayOpen = (day) => {
     setAvailability((prev) => ({
       ...prev,
@@ -61,6 +91,7 @@ const [availability, setAvailability] = useState({
     }));
   };
 
+  // Change Start/End Time for a Specific Day
   const handleAvailabilityChange = (day, field, value) => {
     setAvailability((prev) => ({
       ...prev,
@@ -74,14 +105,30 @@ const [availability, setAvailability] = useState({
     }));
   };
 
-  const navigate = useNavigate();
+  // Toggle Between Same Timing for All or Custom per Day
+  const handleSameForAllChange = (e) => {
+    setAvailability((prev) => ({
+      ...prev,
+      sameForAll: e.target.checked,
+    }));
+  };
 
+  // Handle Default Start/End Time When SameForAll is true
+  const handleDefaultTimeChange = (field, value) => {
+    setAvailability((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Handle Sports Input Change
   const handleInputChange = (index, field, value) => {
     const updatedSports = [...sports];
     updatedSports[index][field] = value;
     setSports(updatedSports);
   };
 
+  // Add a New Sport Row
   const addSportRow = () => {
     setSports([
       ...sports,
@@ -96,24 +143,113 @@ const [availability, setAvailability] = useState({
     ]);
   };
 
+  // Remove Sport Row
   const removeSportRow = (index) => {
-    const updatedSports = sports.filter((_, i) => i !== index);
-    setSports(updatedSports);
+    const updated = sports.filter((_, i) => i !== index);
+    setSports(updated);
   };
 
-  const handlePublish = () => {
-    const data = {
-      sports,
-      primaryImage,
-      galleryImages,
-      amenities: selectedAmenities,
-      availability,
-    };
-    console.log("Final Data:", data);
+  // Upload an Image to Firebase and Return URL
+  const uploadImageToFirebase = async (file) => {
+    const imageRef = ref(storage, `turfImages/${uuidv4()}-${file.name}`);
+    await uploadBytes(imageRef, file);
+    return await getDownloadURL(imageRef);
+  };
+const handlePublish = async () => {
+  try {
+    const uid = localStorage.getItem("firebaseUid");
+    const name = localStorage.getItem("turfName");
+    const address = localStorage.getItem("turfAddress");
+    const city = localStorage.getItem("turfCity");
+    const location = JSON.parse(localStorage.getItem("turfLocation"));
+
+    console.log("📦 Local Info:", { uid});
+
+    // Upload primary image
+    let primaryImageURL = "";
+    if (primaryImage) {
+      const primaryRef = ref(storage, `turfImages/${uuidv4()}_${primaryImage.name}`);
+      const snapshot = await uploadBytes(primaryRef, primaryImage);
+      primaryImageURL = await getDownloadURL(snapshot.ref);
+    }
+
+    // Upload gallery images
+    let galleryImageURLs = [];
+    if (galleryImages.length > 0) {
+      galleryImageURLs = await Promise.all(
+        galleryImages.map(async (file) => {
+          const galleryRef = ref(storage, `turfImages/${uuidv4()}_${file.name}`);
+          const snapshot = await uploadBytes(galleryRef, file);
+          const downloadURL = await getDownloadURL(snapshot.ref);
+          return downloadURL;
+        })
+      );
+    }
+
+    // 🛠️ Transform sports array into what backend expects
+    const sportsData = sports.map((sport) => ({
+      name: sport.sport,
+      courtCount: Number(sport.courts),
+      minSlotDuration: convertMinutesToEnum(sport.minSlotDuration),
+      amountPerSlot: Number(sport.priceAmount),
+      advanceAmount: Number(sport.advanceAmount || 0),
+      availability: {
+        sameForAll: availability.sameForAll,
+        defaultStart: availability.defaultStart,
+        defaultEnd: availability.defaultEnd,
+        customDays: Object.keys(availability.days).map((day) => ({
+          day,
+          isOpen: availability.days[day].open,
+          startTime: availability.days[day].start,
+          endTime: availability.days[day].end,
+        })),
+      },
+    }));
+
+   
+      const data = {
+  owner: uid,
+  sports: sportsData,
+  amenities: selectedAmenities,
+  primaryImage: primaryImageURL,
+  galleryImages: galleryImageURLs,
+};
+
+    
+
+    console.log("🚀 Final Payload Sent to Backend:", data);
+
+    const res = await axios.post("http://localhost:5001/api/turfs/setup", data);
+    console.log("✅ Turf created:", res.data);
+
     navigate("/turfownerdashboard");
-  };
+  } catch (error) {
+    console.error("❌ Error during publish:", error);
+    alert("Failed to publish turf");
+  }
+};
 
-  return (
+// Helper function
+const convertMinutesToEnum = (minutes) => {
+  switch (minutes) {
+
+    case "30":
+      return "30min";
+    case "45":
+      return "45min";
+    case "60":
+      return "1hr";
+    case "90":
+      return "1.5hr";
+    case "120":
+      return "2hr";
+    default:
+      return "1hr"; // fallback
+  }
+};
+
+
+return (
     <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] min-h-screen flex items-center justify-center text-white px-4 py-8">
       <div className="relative w-full max-w-5xl min-h-[700px] [perspective:2000px]">
         <div
@@ -142,11 +278,14 @@ const [availability, setAvailability] = useState({
                     className="border p-2 rounded cursor-pointer"
                   >
                     <option value="">Select Sport</option>
-                    <option>Badminton</option>
-                    <option>Pickleball</option>
-                    <option>Cricket</option>
-                    <option>Tennis</option>
-                    <option>Football</option>
+                    {["Badminton", "Pickleball", "Cricket", "Tennis", "Football"]
+                      .filter(
+                        (option) =>
+                          !sports.some((s, i) => s.sport === option && i !== index)
+                      )
+                      .map((option) => (
+                        <option key={option}>{option}</option>
+                      ))}
                   </select>
 
                   <input
@@ -182,93 +321,85 @@ const [availability, setAvailability] = useState({
                       handleInputChange(index, "advanceAmount", e.target.value)
                     }
                     className="border p-2 rounded"
-                    
                   />
-                   <input
-    type="number"
-    placeholder="Price Amount (₹)"
-    value={sport.priceAmount || ""}
-    onChange={(e) => handleInputChange(index, "priceAmount", e.target.value)}
-    className="border p-2 rounded w-full "
-  />
 
-                 {/* Weekly Availability */}
-  <div className="mb-4 col-span-2">
-    <label className="font-semibold block mb-2">Weekly Availability</label>
-    <label className="flex items-center gap-2 mb-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={availability.sameForAll}
-        onChange={(e) =>
-          setAvailability((prev) => ({
-            ...prev,
-            sameForAll: e.target.checked,
-          }))
-        }
-        className="cursor-pointer"
-      />
-      Same for all days
-    </label>
+                  <input
+                    type="number"
+                    placeholder="Price Amount (₹)"
+                    value={sport.priceAmount || ""}
+                    onChange={(e) =>
+                      handleInputChange(index, "priceAmount", e.target.value)
+                    }
+                    className="border p-2 rounded w-full"
+                  />
 
-    {availability.sameForAll ? (
-      <div className="flex gap-4 mb-4">
-        <input
-          type="time"
-          value={availability.defaultStart}
-          onChange={(e) =>
-            setAvailability((prev) => ({
-              ...prev,
-              defaultStart: e.target.value,
-            }))
-          }
-          className="border p-2 rounded"
-        />
-        <input
-          type="time"
-          value={availability.defaultEnd}
-          onChange={(e) =>
-            setAvailability((prev) => ({
-              ...prev,
-              defaultEnd: e.target.value,
-            }))
-          }
-          className="border p-2 rounded"
-        />
-      </div>
-    ) : (
-      <div className="grid grid-cols-1 gap-4">
-        {Object.keys(availability.days).map((day) => (
-          <div key={day} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={availability.days[day].open}
-              onChange={() => toggleDayOpen(day)}
-              className="cursor-pointer"
-            />
-            <label className="w-24 cursor-pointer">{day}</label>
-            <input
-              type="time"
-              disabled={!availability.days[day].open}
-              value={availability.days[day].start}
-              onChange={(e) =>
-                handleAvailabilityChange(day, "start", e.target.value)
-              }
-              className="border p-2 rounded flex-1"
-            />
-            <input
-              type="time"
-              disabled={!availability.days[day].open}
-              value={availability.days[day].end}
-              onChange={(e) =>
-                handleAvailabilityChange(day, "end", e.target.value)
-              }
-              className="border p-2 rounded flex-1"
-            />
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
+                  <div className="mb-4 col-span-2">
+                    <label className="font-semibold block mb-2">
+                      Weekly Availability
+                    </label>
+                    <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+  checked={availability.sameForAll}
+  onChange={handleSameForAllChange}
+                        className="cursor-pointer"
+                      />
+                      Same for all days
+                    </label>
+
+                    {availability.sameForAll ? (
+                      <div className="flex gap-4 mb-4">
+                        <input
+                          type="time"
+                          value={availability.defaultStart}
+                          onChange={(e) =>
+                            handleDefaultTimeChange(index, "defaultStart", e.target.value)
+                          }
+                          className="border p-2 rounded"
+                        />
+                        <input
+                          type="time"
+                          value={availability.defaultEnd}
+                          onChange={(e) =>
+                            handleDefaultTimeChange(index, "defaultEnd", e.target.value)
+                          }
+                          className="border p-2 rounded"
+                        />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4">
+                        {Object.keys(availability.days).map((day) => (
+                          <div key={day} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={availability.days[day].open}
+                              onChange={() => toggleDayOpen(index, day)}
+                              className="cursor-pointer"
+                            />
+                            <label className="w-24 cursor-pointer">{day}</label>
+                            <input
+                              type="time"
+                              disabled={!availability.days[day].open}
+                              value={availability.days[day].start}
+                              onChange={(e) =>
+                                handleAvailabilityChange(index, day, "start", e.target.value)
+                              }
+                              className="border p-2 rounded flex-1"
+                            />
+                            <input
+                              type="time"
+                              disabled={!availability.days[day].open}
+                              value={availability.days[day].end}
+                              onChange={(e) =>
+                                handleAvailabilityChange(index, day, "end", e.target.value)
+                              }
+                              className="border p-2 rounded flex-1"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   {sports.length > 1 && (
                     <button
@@ -360,6 +491,7 @@ const [availability, setAvailability] = useState({
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+      </div>
+    );
+  }
+

@@ -7,8 +7,5 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     overlay: true,            // keep your overlay
-    proxy: {
-      '/api': 'http://localhost:5000'  // proxy API calls to backend
-    }
   }
 })

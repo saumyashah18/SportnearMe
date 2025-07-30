@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const TurfOwner = require("../models/TurfOwner"); // Adjust path if needed
+const TurfOwner = require("../models/TurfOwner"); // Make sure this path is correct
 
-// ✅ Create or Update Full TurfOwner Profile (from form)
+// ✅ Create or Update Full TurfOwner Profile
 router.post("/profile", async (req, res) => {
   const {
     firebaseUid,
@@ -16,6 +16,10 @@ router.post("/profile", async (req, res) => {
     turfDescription,
     turfLocationUrl,
   } = req.body;
+
+  if (!firebaseUid) {
+    return res.status(400).json({ error: "Firebase UID is required" });
+  }
 
   try {
     let owner = await TurfOwner.findOne({ firebaseUid });
@@ -59,7 +63,7 @@ router.post("/profile", async (req, res) => {
   }
 });
 
-// ✅ Basic Create for OTP step (just firebaseUid and phone)
+// ✅ Create TurfOwner for OTP step (firebaseUid + phone only)
 router.post("/create", async (req, res) => {
   const { firebaseUid, phone } = req.body;
 
@@ -83,48 +87,6 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.post("/profile", async (req, res) => {
-  const {
-    firebaseUid,
-    phone,
-    name,
-    dob,
-    email,
-    gender,
-    turfName,
-    turfAddress,
-    turfDescription,
-    turfLocationUrl
-  } = req.body;
-
-  if (!firebaseUid) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  try {
-    const updatedOwner = await Owner.findOneAndUpdate(
-      { firebaseUid },
-      {
-        phone,
-        name,
-        dob,
-        email,
-        gender,
-        turfName,
-        turfAddress,
-        turfDescription,
-        turfLocationUrl,
-      },
-      { new: true, upsert: true }
-    );
-
-    res.status(200).json(updatedOwner);
-  } catch (err) {
-    console.error("Error updating owner profile:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
 // ✅ Check if TurfOwner exists by Firebase UID
 router.get("/check/:uid", async (req, res) => {
   const { uid } = req.params;
@@ -143,9 +105,10 @@ router.get("/check/:uid", async (req, res) => {
   }
 });
 
-// ✅ Get profile by Firebase UID
+// ✅ Get full profile by Firebase UID
 router.get("/profile/:firebaseUid", async (req, res) => {
   const { firebaseUid } = req.params;
+  console.log("🔍 Received Firebase UID:", firebaseUid);
 
   try {
     const owner = await TurfOwner.findOne({ firebaseUid });
@@ -160,6 +123,5 @@ router.get("/profile/:firebaseUid", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 module.exports = router;
