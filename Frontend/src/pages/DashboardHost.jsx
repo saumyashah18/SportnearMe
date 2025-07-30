@@ -26,8 +26,6 @@ export default function DashboardHost() {
     fetchOwnerData();
   }, []);
 
-    
-
   const [sports, setSports] = useState([
     {
       sport: "",
@@ -157,11 +155,6 @@ export default function DashboardHost() {
 const handlePublish = async () => {
   try {
     const uid = localStorage.getItem("firebaseUid");
-    const name = localStorage.getItem("turfName");
-    const address = localStorage.getItem("turfAddress");
-    const city = localStorage.getItem("turfCity");
-    const location = JSON.parse(localStorage.getItem("turfLocation"));
-
     console.log("📦 Local Info:", { uid});
 
     // Upload primary image
@@ -207,7 +200,7 @@ const handlePublish = async () => {
 
    
       const data = {
-  owner: uid,
+  uid : uid,
   sports: sportsData,
   amenities: selectedAmenities,
   primaryImage: primaryImageURL,

@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ Routes
 app.use("/api/users", userRoute);
 app.use("/api/owner", ownerRoutes);
-app.use("/api/turfs", turfRoutes); // ✅ Mount turf routes here
+app.use("/api/turfs", turfRoutes); 
 
 // ✅ Root route
 app.get("/", (req, res) => {

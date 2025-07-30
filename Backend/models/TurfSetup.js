@@ -2,16 +2,6 @@ const mongoose = require("mongoose");
 
 const turfSchema = new mongoose.Schema({
   uid : { type: mongoose.Schema.Types.ObjectId, required: true },
-
-  name: { type: String, required: true },
-  address: { type: String },
-  city: { type: String },
-
-  location: {
-    type: { type: String, enum: ["Point"], default: "Point" },
-    coordinates: { type: [Number] }, // [longitude, latitude]
-  },
-
   primaryImage: { type: String },
   images: [{ type: String }],
 

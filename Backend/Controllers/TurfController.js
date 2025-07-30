@@ -6,20 +6,15 @@ const createTurf = async (req, res) => {
 
     const {
       uid,
-      name,
-      address,
-      city,
-      location,
       primaryImage,
       galleryImages,
       sports,
       amenities,
     } = req.body;
 
-    if (!uid || !name || !sports || !Array.isArray(sports) || sports.length === 0) {
+    if (!uid || !sports || !Array.isArray(sports) || sports.length === 0) {
       console.warn("⚠️ Missing or invalid fields:", {
         uidType: typeof uid,
-  nameType: typeof name,
   sportsType: typeof sports,
   sportsLength: sports?.length,
       });
@@ -28,10 +23,6 @@ const createTurf = async (req, res) => {
 
     const newTurf = new Turf({
       uid,
-      name,
-      address,
-      city,
-      location,
       primaryImage,
       galleryImages,
       sports,
