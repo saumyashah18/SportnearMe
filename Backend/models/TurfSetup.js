@@ -22,8 +22,8 @@ const turfSchema = new mongoose.Schema({
       availability: {
         sameForAll: { type: Boolean, required: true },
 
-        defaultStart: { type: String }, // HH:mm
-        defaultEnd: { type: String },   // HH:mm
+        defaultStart: { type: String }, 
+        defaultEnd: { type: String },   
 
         customDays: [
           {

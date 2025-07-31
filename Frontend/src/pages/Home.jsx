@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../pages/Sidebar";
 import { Menu } from "lucide-react";
 
+
 export default function Home() {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [quote, setQuote] = useState("");
@@ -75,7 +76,7 @@ export default function Home() {
 
       {/* Desktop Navigation Bar */}
       <nav className="bg-gray-800 border-b border-gray-700/50 py-2 px-6 text-lg md:flex justify-center items-center gap-6 hidden">
-        {["Home", "Location", "About Us"].map((item) => (
+        {["Home", "Location"].map((item) => (
           <a
             key={item}
             href="#"
@@ -84,6 +85,7 @@ export default function Home() {
             {item}
           </a>
         ))}
+        <a href="/aboutus" className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300 cursor-pointer">About Us</a>
         <a href="/catalogue" className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300 cursor-pointer">Sports Catalogue</a>
         <a href="/signup-host" className="relative text-white hover:text-blue-300 after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-blue-300 hover:after:w-full after:transition-all after:duration-300 cursor-pointer">Host Your Services</a>
        {isLoggedIn ? (

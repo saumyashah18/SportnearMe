@@ -13,6 +13,7 @@ import TurfProfile from "./pages/TurfProfile";
 import TurfDescription from "./pages/TurfDescription";   
 import ManageTurf from "./pages/ManageTurf";
 import OwnerBooking from "./pages/OwnerBooking";  
+import AboutUs from "./pages/AboutUs";
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
         <Route path="/turfdescription" element={<TurfDescription />} />
         <Route path="/manageturf" element={<ManageTurf />} />
          <Route path="/owner_bookings" element={<OwnerBooking />} />
+          <Route path="/aboutus" element={<AboutUs />} />
 
       </Routes>
     </Router>

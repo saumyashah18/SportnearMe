@@ -152,6 +152,7 @@ export default function DashboardHost() {
     await uploadBytes(imageRef, file);
     return await getDownloadURL(imageRef);
   };
+
 const handlePublish = async () => {
   try {
     const uid = localStorage.getItem("firebaseUid");
@@ -199,15 +200,13 @@ const handlePublish = async () => {
     }));
 
    
-      const data = {
+  const data = {
   uid : uid,
   sports: sportsData,
   amenities: selectedAmenities,
   primaryImage: primaryImageURL,
   galleryImages: galleryImageURLs,
 };
-
-    
 
     console.log("🚀 Final Payload Sent to Backend:", data);
 
