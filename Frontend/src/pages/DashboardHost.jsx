@@ -193,7 +193,7 @@ const handleDefaultTimeChange = (field, value) => {
       }));
 
       const data = {
-        uid,
+        uid : uid,
         sports: sportsData,
         amenities: selectedAmenities,
         primaryImage: primaryImageURL || null,
