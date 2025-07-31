@@ -3,8 +3,9 @@ import { storage } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
-
+import { v4 as uuidv4 } from "uuid";
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
 
 export default function DashboardHost() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function DashboardHost() {
           return;
         }
 
-        const response = await axios.get(`/api/owners/profile/${uid}`);
+        await axios.get(`/api/owners/profile/${uid}`);
       } catch (error) {
         console.error("❌ Failed to fetch owner data:", error);
       }
@@ -34,23 +35,24 @@ export default function DashboardHost() {
       endTime: "",
       minSlotDuration: "",
       advanceAmount: "",
+      priceAmount: "",
     },
   ]);
 
-  const [availability, setAvailability] = useState({
-    sameForAll: true,
-    defaultStart: "",
-    defaultEnd: "",
-    days: {
-      Monday: { open: false, start: "", end: "" },
-      Tuesday: { open: false, start: "", end: "" },
-      Wednesday: { open: false, start: "", end: "" },
-      Thursday: { open: false, start: "", end: "" },
-      Friday: { open: false, start: "", end: "" },
-      Saturday: { open: false, start: "", end: "" },
-      Sunday: { open: false, start: "", end: "" },
-    },
-  });
+const [availability, setAvailability] = useState({
+  sameForAll: false,
+  defaultStart: "",
+  defaultEnd: "",
+  days: {
+    Monday: { open: false, start: "", end: "" },
+    Tuesday: { open: false, start: "", end: "" },
+    Wednesday: { open: false, start: "", end: "" },
+    Thursday: { open: false, start: "", end: "" },
+    Friday: { open: false, start: "", end: "" },
+    Saturday: { open: false, start: "", end: "" },
+    Sunday: { open: false, start: "", end: "" },
+  },
+});
 
   const [showBack, setShowBack] = useState(false);
   const [primaryImage, setPrimaryImage] = useState(null);
@@ -67,28 +69,32 @@ export default function DashboardHost() {
     "First Aid",
   ];
 
-  // Toggle Amenity Selection
   const toggleAmenity = (item) => {
     setSelectedAmenities((prev) =>
-      prev.includes(item) ? prev.filter((a) => a !== item) : [...prev, item]
+      prev.includes(item)
+        ? prev.filter((a) => a !== item)
+        : [...prev, item]
     );
   };
 
-  // Toggle a Day's Availability
-  const toggleDayOpen = (day) => {
-    setAvailability((prev) => ({
+const toggleDayOpen = (day) => {
+  setAvailability((prev) => {
+    const current = prev.days[day] || { open: false, start: "", end: "" };
+    return {
       ...prev,
       days: {
         ...prev.days,
         [day]: {
-          ...prev.days[day],
-          open: !prev.days[day].open,
+          ...current,
+          open: !current.open,
         },
       },
-    }));
-  };
+    };
+  });
+};
 
-  // Change Start/End Time for a Specific Day
+
+
   const handleAvailabilityChange = (day, field, value) => {
     setAvailability((prev) => ({
       ...prev,
@@ -102,7 +108,6 @@ export default function DashboardHost() {
     }));
   };
 
-  // Toggle Between Same Timing for All or Custom per Day
   const handleSameForAllChange = (e) => {
     setAvailability((prev) => ({
       ...prev,
@@ -110,25 +115,23 @@ export default function DashboardHost() {
     }));
   };
 
-  // Handle Default Start/End Time When SameForAll is true
-  const handleDefaultTimeChange = (field, value) => {
-    setAvailability((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+const handleDefaultTimeChange = (field, value) => {
+  setAvailability((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+};
 
-  // Handle Sports Input Change
+
   const handleInputChange = (index, field, value) => {
-    const updatedSports = [...sports];
-    updatedSports[index][field] = value;
-    setSports(updatedSports);
+    const updated = [...sports];
+    updated[index][field] = value;
+    setSports(updated);
   };
 
-  // Add a New Sport Row
   const addSportRow = () => {
-    setSports([
-      ...sports,
+    setSports((prev) => [
+      ...prev,
       {
         sport: "",
         courts: "",
@@ -136,16 +139,16 @@ export default function DashboardHost() {
         endTime: "",
         minSlotDuration: "",
         advanceAmount: "",
+        priceAmount: "",
       },
     ]);
   };
 
-  // Remove Sport Row
   const removeSportRow = (index) => {
-    const updated = sports.filter((_, i) => i !== index);
-    setSports(updated);
+    setSports((prev) => prev.filter((_, i) => i !== index));
   };
 
+<<<<<<< HEAD
   // Upload an Image to Firebase and Return URL
   const uploadImageToFirebase = async (file) => {
     const imageRef = ref(storage, `turfImages/${uuidv4()}-${file.name}`);
@@ -157,48 +160,51 @@ const handlePublish = async () => {
   try {
     const uid = localStorage.getItem("firebaseUid");
     console.log("📦 Local Info:", { uid});
+=======
+  const handlePublish = async () => {
+    try {
+      const uid = localStorage.getItem("firebaseUid");
+      console.log("Local Info:", { uid });
+>>>>>>> 4e6ff8dca42387eed4b5e4865aacf9dc2903928f
 
-    // Upload primary image
-    let primaryImageURL = "";
-    if (primaryImage) {
-      const primaryRef = ref(storage, `turfImages/${uuidv4()}_${primaryImage.name}`);
-      const snapshot = await uploadBytes(primaryRef, primaryImage);
-      primaryImageURL = await getDownloadURL(snapshot.ref);
-    }
+      let primaryImageURL = "";
+      if (primaryImage) {
+        const primaryRef = ref(storage, `turfImages/${uuidv4()}_${primaryImage.name}`);
+        const snapshot = await uploadBytes(primaryRef, primaryImage);
+        primaryImageURL = await getDownloadURL(snapshot.ref);
+      }
 
-    // Upload gallery images
-    let galleryImageURLs = [];
-    if (galleryImages.length > 0) {
-      galleryImageURLs = await Promise.all(
-        galleryImages.map(async (file) => {
-          const galleryRef = ref(storage, `turfImages/${uuidv4()}_${file.name}`);
-          const snapshot = await uploadBytes(galleryRef, file);
-          const downloadURL = await getDownloadURL(snapshot.ref);
-          return downloadURL;
-        })
-      );
-    }
+      let galleryImageURLs = [];
+      if (galleryImages.length > 0) {
+        galleryImageURLs = await Promise.all(
+          galleryImages.map(async (file) => {
+            const galleryRef = ref(storage, `turfImages/${uuidv4()}_${file.name}`);
+            const snapshot = await uploadBytes(galleryRef, file);
+            return await getDownloadURL(snapshot.ref);
+          })
+        );
+      }
 
-    // 🛠️ Transform sports array into what backend expects
-    const sportsData = sports.map((sport) => ({
-      name: sport.sport,
-      courtCount: Number(sport.courts),
-      minSlotDuration: convertMinutesToEnum(sport.minSlotDuration),
-      amountPerSlot: Number(sport.priceAmount),
-      advanceAmount: Number(sport.advanceAmount || 0),
-      availability: {
-        sameForAll: availability.sameForAll,
-        defaultStart: availability.defaultStart,
-        defaultEnd: availability.defaultEnd,
-        customDays: Object.keys(availability.days).map((day) => ({
-          day,
-          isOpen: availability.days[day].open,
-          startTime: availability.days[day].start,
-          endTime: availability.days[day].end,
-        })),
-      },
-    }));
+      const sportsData = sports.map((sport) => ({
+        name: sport.sport,
+        courtCount: Number(sport.courts),
+        minSlotDuration: convertMinutesToEnum(sport.minSlotDuration),
+        amountPerSlot: Number(sport.priceAmount),
+        advanceAmount: Number(sport.advanceAmount || 0),
+        availability: {
+          sameForAll: availability.sameForAll,
+          defaultStart: availability.defaultStart,
+          defaultEnd: availability.defaultEnd,
+          customDays: Object.keys(availability.days).map((day) => ({
+            day,
+            isOpen: availability.days[day].open,
+            startTime: availability.days[day].start,
+            endTime: availability.days[day].end,
+          })),
+        },
+      }));
 
+<<<<<<< HEAD
    
   const data = {
   uid : uid,
@@ -238,7 +244,42 @@ const convertMinutesToEnum = (minutes) => {
       return "1hr"; // fallback
   }
 };
+=======
+      const data = {
+        uid : uid,
+        sports : sportsData,
+        amenities: selectedAmenities,
+        primaryImage: primaryImageURL,
+        galleryImages: galleryImageURLs,
+      };
 
+      console.log("Final Payload Sent to Backend:", data);
+      const res = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/api/turfs/setup`, data);
+      console.log(" Turf created:", res.data);
+      navigate("/turfownerdashboard");
+    } catch (error) {
+      console.error(" Error during publish:", error);
+      alert("Failed to publish turf");
+    }
+  };
+>>>>>>> 4e6ff8dca42387eed4b5e4865aacf9dc2903928f
+
+  const convertMinutesToEnum = (minutes) => {
+    switch (minutes) {
+      case "30":
+        return "30min";
+      case "45":
+        return "45min";
+      case "60":
+        return "1hr";
+      case "90":
+        return "1.5hr";
+      case "120":
+        return "2hr";
+      default:
+        return "1hr";
+    }
+  };
 
 return (
     <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] min-h-screen flex items-center justify-center text-white px-4 py-8">
@@ -324,73 +365,93 @@ return (
                     className="border p-2 rounded w-full"
                   />
 
-                  <div className="mb-4 col-span-2">
-                    <label className="font-semibold block mb-2">
-                      Weekly Availability
-                    </label>
-                    <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-  checked={availability.sameForAll}
-  onChange={handleSameForAllChange}
-                        className="cursor-pointer"
-                      />
-                      Same for all days
-                    </label>
+   <div className="mb-4 col-span-2">
+  <label className="font-semibold block mb-2">Weekly Availability</label>
 
-                    {availability.sameForAll ? (
-                      <div className="flex gap-4 mb-4">
-                        <input
-                          type="time"
-                          value={availability.defaultStart}
-                          onChange={(e) =>
-                            handleDefaultTimeChange(index, "defaultStart", e.target.value)
-                          }
-                          className="border p-2 rounded"
-                        />
-                        <input
-                          type="time"
-                          value={availability.defaultEnd}
-                          onChange={(e) =>
-                            handleDefaultTimeChange(index, "defaultEnd", e.target.value)
-                          }
-                          className="border p-2 rounded"
-                        />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-4">
-                        {Object.keys(availability.days).map((day) => (
-                          <div key={day} className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={availability.days[day].open}
-                              onChange={() => toggleDayOpen(index, day)}
-                              className="cursor-pointer"
-                            />
-                            <label className="w-24 cursor-pointer">{day}</label>
-                            <input
-                              type="time"
-                              disabled={!availability.days[day].open}
-                              value={availability.days[day].start}
-                              onChange={(e) =>
-                                handleAvailabilityChange(index, day, "start", e.target.value)
-                              }
-                              className="border p-2 rounded flex-1"
-                            />
-                            <input
-                              type="time"
-                              disabled={!availability.days[day].open}
-                              value={availability.days[day].end}
-                              onChange={(e) =>
-                                handleAvailabilityChange(index, day, "end", e.target.value)
-                              }
-                              className="border p-2 rounded flex-1"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+  {/* Same for all toggle */}
+  <label className="flex items-center gap-2 mb-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={availability.sameForAll}
+      onChange={handleSameForAllChange}
+      className="cursor-pointer"
+    />
+    Same for all days
+  </label>
+
+  {/* Same for all time inputs */}
+  {availability.sameForAll ? (
+    <div className="flex gap-4 mb-4">
+      <TimePicker
+        onChange={(value) =>
+          handleDefaultTimeChange( "defaultStart", value)
+        }
+        value={availability.defaultStart || ""}
+        disableClock
+        clearIcon={null}
+        format="hh:mm a"
+        className="border p-2 rounded"
+      />
+      <TimePicker
+        onChange={(value) =>
+          handleDefaultTimeChange( "defaultEnd", value)
+        }
+        value={availability.defaultEnd || ""}
+        disableClock
+        clearIcon={null}
+        format="hh:mm a"
+        className="border p-2 rounded"
+      />
+    </div>
+  ) : (
+    // Per-day time configuration
+    <div className="grid grid-cols-1 gap-4">
+      {[
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ].map((day) => (
+        <div key={day} className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={availability.days?.[day]?.open || false}
+            onChange={() => toggleDayOpen(day)}
+            className="cursor-pointer"
+          />
+          <label className="w-24 cursor-pointer">{day}</label>
+
+          <TimePicker
+            onChange={(value) =>
+              handleAvailabilityChange(day, "start", value)
+            }
+            value={availability.days?.[day]?.start || ""}
+            disabled={!availability.days?.[day]?.open}
+            disableClock
+            clearIcon={null}
+            format="hh:mm a"
+            className="border p-2 rounded flex-1"
+          />
+
+          <TimePicker
+            onChange={(value) =>
+              handleAvailabilityChange(day, "end", value)
+            }
+            value={availability.days?.[day]?.end || ""}
+            disabled={!availability.days?.[day]?.open}
+            disableClock
+            clearIcon={null}
+            format="hh:mm a"
+            className="border p-2 rounded flex-1"
+          />
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
                   {sports.length > 1 && (
                     <button

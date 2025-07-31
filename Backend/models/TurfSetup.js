@@ -22,8 +22,8 @@ const turfSchema = new mongoose.Schema({
       availability: {
         sameForAll: { type: Boolean, required: true },
 
-        defaultStart: { type: String }, 
-        defaultEnd: { type: String },   
+        defaultStart: { type: String }, // HH:mm
+        defaultEnd: { type: String },   // HH:mm
 
         customDays: [
           {
@@ -53,4 +53,4 @@ const turfSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Turf", turfSchema);
+module.exports = mongoose.model("TurfSetup", turfSetupSchema);
