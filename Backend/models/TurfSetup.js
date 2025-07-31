@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const turfSchema = new mongoose.Schema({
-  uid : { type: mongoose.Schema.Types.ObjectId, required: true },
+  uid : { type: mongoose.Schema.Types.ObjectId, required: false },
   primaryImage: { type: String },
   images: [{ type: String }],
 
@@ -53,4 +53,4 @@ const turfSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("TurfSetup", turfSetupSchema);
+module.exports = mongoose.model("TurfSetup", turfSchema);
