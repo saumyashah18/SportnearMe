@@ -148,24 +148,17 @@ const handleDefaultTimeChange = (field, value) => {
     setSports((prev) => prev.filter((_, i) => i !== index));
   };
 
-<<<<<<< HEAD
-  // Upload an Image to Firebase and Return URL
-  const uploadImageToFirebase = async (file) => {
-    const imageRef = ref(storage, `turfImages/${uuidv4()}-${file.name}`);
-    await uploadBytes(imageRef, file);
-    return await getDownloadURL(imageRef);
-  };
+// Upload an Image to Firebase and Return URL
+const uploadImageToFirebase = async (file) => {
+  const imageRef = ref(storage, `turfImages/${uuidv4()}-${file.name}`);
+  await uploadBytes(imageRef, file);
+  return await getDownloadURL(imageRef);
+};
 
 const handlePublish = async () => {
   try {
     const uid = localStorage.getItem("firebaseUid");
-    console.log("📦 Local Info:", { uid});
-=======
-  const handlePublish = async () => {
-    try {
-      const uid = localStorage.getItem("firebaseUid");
-      console.log("Local Info:", { uid });
->>>>>>> 4e6ff8dca42387eed4b5e4865aacf9dc2903928f
+    console.log("📦 Local Info:", { uid });
 
       let primaryImageURL = "";
       if (primaryImage) {
@@ -204,32 +197,29 @@ const handlePublish = async () => {
         },
       }));
 
-<<<<<<< HEAD
-   
   const data = {
-  uid : uid,
-  sports: sportsData,
-  amenities: selectedAmenities,
-  primaryImage: primaryImageURL,
-  galleryImages: galleryImageURLs,
-};
+    uid: uid,
+    sports: sportsData,
+    amenities: selectedAmenities,
+    primaryImage: primaryImageURL,
+    galleryImages: galleryImageURLs,
+  };
 
-    console.log("🚀 Final Payload Sent to Backend:", data);
+  console.log("🚀 Final Payload Sent to Backend:", data);
 
-    const res = await axios.post( `${import.meta.env.VITE_APP_API_BASE_URL}/api/turfs/setup`, data);
-    console.log("✅ Turf created:", res.data);
+  const res = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/api/turfs/setup`, data);
+  console.log("✅ Turf created:", res.data);
 
-    navigate("/turfownerdashboard");
-  } catch (error) {
-    console.error("❌ Error during publish:", error);
-    alert("Failed to publish turf");
-  }
+  navigate("/turfownerdashboard");
+} catch (error) {
+  console.error("❌ Error during publish:", error);
+  alert("Failed to publish turf");
+}
 };
 
 // Helper function
 const convertMinutesToEnum = (minutes) => {
   switch (minutes) {
-
     case "30":
       return "30min";
     case "45":
@@ -244,52 +234,11 @@ const convertMinutesToEnum = (minutes) => {
       return "1hr"; // fallback
   }
 };
-=======
-      const data = {
-        uid : uid,
-        sports : sportsData,
-        amenities: selectedAmenities,
-        primaryImage: primaryImageURL,
-        galleryImages: galleryImageURLs,
-      };
-
-      console.log("Final Payload Sent to Backend:", data);
-      const res = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/api/turfs/setup`, data);
-      console.log(" Turf created:", res.data);
-      navigate("/turfownerdashboard");
-    } catch (error) {
-      console.error(" Error during publish:", error);
-      alert("Failed to publish turf");
-    }
-  };
->>>>>>> 4e6ff8dca42387eed4b5e4865aacf9dc2903928f
-
-  const convertMinutesToEnum = (minutes) => {
-    switch (minutes) {
-      case "30":
-        return "30min";
-      case "45":
-        return "45min";
-      case "60":
-        return "1hr";
-      case "90":
-        return "1.5hr";
-      case "120":
-        return "2hr";
-      default:
-        return "1hr";
-    }
-  };
-
-return (
-    <div className="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] min-h-screen flex items-center justify-center text-white px-4 py-8">
-      <div className="relative w-full max-w-5xl min-h-[700px] [perspective:2000px]">
-        <div
-          className={`transition-transform duration-700 [transform-style:preserve-3d] relative w-full h-full ${
-            showBack ? "rotate-y-180" : ""
-          }`}
-        >
-          {/* Front Side */}
+  return (
+    <div className="relative w-full min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-3xl mx-auto">
+        {/* Front Side */}
+        {!showBack && (
           <div className="absolute w-full backface-hidden bg-white p-6 rounded-2xl shadow-md text-gray-800">
             <h1 className="text-xl text-center font-bold mb-4">
               Set Up Your Turf Profile
@@ -365,93 +314,93 @@ return (
                     className="border p-2 rounded w-full"
                   />
 
-   <div className="mb-4 col-span-2">
-  <label className="font-semibold block mb-2">Weekly Availability</label>
+                  <div className="mb-4 col-span-2">
+                    <label className="font-semibold block mb-2">Weekly Availability</label>
 
-  {/* Same for all toggle */}
-  <label className="flex items-center gap-2 mb-2 cursor-pointer">
-    <input
-      type="checkbox"
-      checked={availability.sameForAll}
-      onChange={handleSameForAllChange}
-      className="cursor-pointer"
-    />
-    Same for all days
-  </label>
+                    {/* Same for all toggle */}
+                    <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={availability.sameForAll}
+                        onChange={handleSameForAllChange}
+                        className="cursor-pointer"
+                      />
+                      Same for all days
+                    </label>
 
-  {/* Same for all time inputs */}
-  {availability.sameForAll ? (
-    <div className="flex gap-4 mb-4">
-      <TimePicker
-        onChange={(value) =>
-          handleDefaultTimeChange( "defaultStart", value)
-        }
-        value={availability.defaultStart || ""}
-        disableClock
-        clearIcon={null}
-        format="hh:mm a"
-        className="border p-2 rounded"
-      />
-      <TimePicker
-        onChange={(value) =>
-          handleDefaultTimeChange( "defaultEnd", value)
-        }
-        value={availability.defaultEnd || ""}
-        disableClock
-        clearIcon={null}
-        format="hh:mm a"
-        className="border p-2 rounded"
-      />
-    </div>
-  ) : (
-    // Per-day time configuration
-    <div className="grid grid-cols-1 gap-4">
-      {[
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ].map((day) => (
-        <div key={day} className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={availability.days?.[day]?.open || false}
-            onChange={() => toggleDayOpen(day)}
-            className="cursor-pointer"
-          />
-          <label className="w-24 cursor-pointer">{day}</label>
+                    {/* Same for all time inputs */}
+                    {availability.sameForAll ? (
+                      <div className="flex gap-4 mb-4">
+                        <TimePicker
+                          onChange={(value) =>
+                            handleDefaultTimeChange("defaultStart", value)
+                          }
+                          value={availability.defaultStart || ""}
+                          disableClock
+                          clearIcon={null}
+                          format="hh:mm a"
+                          className="border p-2 rounded"
+                        />
+                        <TimePicker
+                          onChange={(value) =>
+                            handleDefaultTimeChange("defaultEnd", value)
+                          }
+                          value={availability.defaultEnd || ""}
+                          disableClock
+                          clearIcon={null}
+                          format="hh:mm a"
+                          className="border p-2 rounded"
+                        />
+                      </div>
+                    ) : (
+                      // Per-day time configuration
+                      <div className="grid grid-cols-1 gap-4">
+                        {[
+                          "Monday",
+                          "Tuesday",
+                          "Wednesday",
+                          "Thursday",
+                          "Friday",
+                          "Saturday",
+                          "Sunday",
+                        ].map((day) => (
+                          <div key={day} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={availability.days?.[day]?.open || false}
+                              onChange={() => toggleDayOpen(day)}
+                              className="cursor-pointer"
+                            />
+                            <label className="w-24 cursor-pointer">{day}</label>
 
-          <TimePicker
-            onChange={(value) =>
-              handleAvailabilityChange(day, "start", value)
-            }
-            value={availability.days?.[day]?.start || ""}
-            disabled={!availability.days?.[day]?.open}
-            disableClock
-            clearIcon={null}
-            format="hh:mm a"
-            className="border p-2 rounded flex-1"
-          />
+                            <TimePicker
+                              onChange={(value) =>
+                                handleAvailabilityChange(day, "start", value)
+                              }
+                              value={availability.days?.[day]?.start || ""}
+                              disabled={!availability.days?.[day]?.open}
+                              disableClock
+                              clearIcon={null}
+                              format="hh:mm a"
+                              className="border p-2 rounded flex-1"
+                            />
 
-          <TimePicker
-            onChange={(value) =>
-              handleAvailabilityChange(day, "end", value)
-            }
-            value={availability.days?.[day]?.end || ""}
-            disabled={!availability.days?.[day]?.open}
-            disableClock
-            clearIcon={null}
-            format="hh:mm a"
-            className="border p-2 rounded flex-1"
-          />
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+                            <TimePicker
+                              onChange={(value) =>
+                                handleAvailabilityChange(day, "end", value)
+                              }
+                              value={availability.days?.[day]?.end || ""}
+                              disabled={!availability.days?.[day]?.open}
+                              disableClock
+                              clearIcon={null}
+                              format="hh:mm a"
+                              className="border p-2 rounded flex-1"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   {sports.length > 1 && (
                     <button
@@ -485,8 +434,10 @@ return (
               </button>
             </div>
           </div>
+        )}
 
-          {/* Back Side */}
+        {/* Back Side */}
+        {showBack && (
           <div className="absolute w-full rotate-y-180 backface-hidden bg-white p-6 rounded-2xl shadow-md text-gray-800">
             <h2 className="text-lg font-bold mb-4">Add Images, Amenities & Availability</h2>
 
@@ -515,11 +466,13 @@ return (
                 <button
                   key={item}
                   onClick={() => toggleAmenity(item)}
-                  className={`px-4 py-2 rounded-full border text-sm cursor-pointer ${
-                    selectedAmenities.includes(item)
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
+                  className={
+                    `px-4 py-2 rounded-full border text-sm cursor-pointer ${
+                      selectedAmenities.includes(item)
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-800"
+                    }`
+                  }
                 >
                   {item}
                 </button>
@@ -541,9 +494,9 @@ return (
               </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
-      </div>
-    );
-  }
+    </div>
+  );
+}
 
