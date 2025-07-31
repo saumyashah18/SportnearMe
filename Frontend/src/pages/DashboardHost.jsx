@@ -39,22 +39,6 @@ export default function DashboardHost() {
     },
   ]);
 
-
-  // const handleDummyClick = async () => {
-  //   try {
-  //     const response = await axios.post("http://localhost:5001/api/turf/dummy");
-  //     alert(`✅ Response: ${response.data}`);
-  //     console.log("✅ Dummy API response:", response.data);
-  //   } catch (error) {
-  //     console.error("❌ Error calling dummy API:", error);
-  //     alert("❌ Dummy API failed!");
-  //   }
-  // };
-
-
-
-  
-
 const [availability, setAvailability] = useState({
   sameForAll: false,
   defaultStart: "",
