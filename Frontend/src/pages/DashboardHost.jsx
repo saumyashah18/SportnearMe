@@ -166,24 +166,10 @@ const handleDefaultTimeChange = (field, value) => {
     setSports((prev) => prev.filter((_, i) => i !== index));
   };
 
-<<<<<<< HEAD
-  // Upload an Image to Firebase and Return URL
-  const uploadImageToFirebase = async (file) => {
-    const imageRef = ref(storage, `turfImages/${uuidv4()}-${file.name}`);
-    await uploadBytes(imageRef, file);
-    return await getDownloadURL(imageRef);
-  };
-
-const handlePublish = async () => {
-  try {
-    const uid = localStorage.getItem("firebaseUid");
-    console.log("📦 Local Info:", { uid});
-=======
   const handlePublish = async () => {
     try {
       const uid = localStorage.getItem("firebaseUid");
-      console.log("Local Info:", { uid });
->>>>>>> 4e6ff8dca42387eed4b5e4865aacf9dc2903928f
+      console.log("📦 Local Info:", { uid });
 
       let primaryImageURL = "";
       if (primaryImage) {
@@ -222,65 +208,23 @@ const handlePublish = async () => {
         },
       }));
 
-<<<<<<< HEAD
-   
-  const data = {
-  uid : uid,
-  sports: sportsData,
-  amenities: selectedAmenities,
-  primaryImage: primaryImageURL,
-  galleryImages: galleryImageURLs,
-};
-
-    console.log("🚀 Final Payload Sent to Backend:", data);
-
-    const res = await axios.post( `${import.meta.env.VITE_APP_API_BASE_URL}/api/turfs/setup`, data);
-    console.log("✅ Turf created:", res.data);
-
-    navigate("/turfownerdashboard");
-  } catch (error) {
-    console.error("❌ Error during publish:", error);
-    alert("Failed to publish turf");
-  }
-};
-
-// Helper function
-const convertMinutesToEnum = (minutes) => {
-  switch (minutes) {
-
-    case "30":
-      return "30min";
-    case "45":
-      return "45min";
-    case "60":
-      return "1hr";
-    case "90":
-      return "1.5hr";
-    case "120":
-      return "2hr";
-    default:
-      return "1hr"; // fallback
-  }
-};
-=======
       const data = {
         uid : uid,
-        sports : sportsData,
+        sports: sportsData,
         amenities: selectedAmenities,
-        primaryImage: primaryImageURL,
-        galleryImages: galleryImageURLs,
+        primaryImage: primaryImageURL || null,
+        galleryImages: galleryImageURLs.length > 0 ? galleryImageURLs : [],
       };
 
-      console.log("Final Payload Sent to Backend:", data);
-      const res = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/api/turfs/setup`, data);
-      console.log(" Turf created:", res.data);
+      console.log("🚀 Final Payload Sent to Backend:", data);
+      const res = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/api/turf/setup`, data);
+      console.log("✅ Turf created:", res.data);
       navigate("/turfownerdashboard");
     } catch (error) {
-      console.error(" Error during publish:", error);
+      console.error("❌ Error during publish:", error);
       alert("Failed to publish turf");
     }
   };
->>>>>>> 4e6ff8dca42387eed4b5e4865aacf9dc2903928f
 
   const convertMinutesToEnum = (minutes) => {
     switch (minutes) {
@@ -383,19 +327,19 @@ return (
                     className="border p-2 rounded w-full"
                   />
 
-                  <div className="mb-4 col-span-2">
-                    <label className="font-semibold block mb-2">Weekly Availability</label>
+   <div className="mb-4 col-span-2">
+  <label className="font-semibold block mb-2">Weekly Availability</label>
 
-                    {/* Same for all toggle */}
-                    <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={availability.sameForAll}
-                        onChange={handleSameForAllChange}
-                        className="cursor-pointer"
-                      />
-                      Same for all days
-                    </label>
+  {/* Same for all toggle */}
+  <label className="flex items-center gap-2 mb-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={availability.sameForAll}
+      onChange={handleSameForAllChange}
+      className="cursor-pointer"
+    />
+    Same for all days
+  </label>
 
   {/* Same for all time inputs */}
   {availability.sameForAll ? (
@@ -412,7 +356,7 @@ return (
       />
       <TimePicker
         onChange={(value) =>
-          handleDefaultTimeChange( "defaultEnd", value)
+          handleDefaultTimeChange(  "defaultEnd", value)
         }
         value={availability.defaultEnd || ""}
         disableClock
@@ -444,7 +388,7 @@ return (
 
           <TimePicker
             onChange={(value) =>
-              handleAvailabilityChange(day, "start", value)
+              handleAvailabilityChange( "start", value)
             }
             value={availability.days?.[day]?.start || ""}
             disabled={!availability.days?.[day]?.open}
@@ -456,7 +400,7 @@ return (
 
           <TimePicker
             onChange={(value) =>
-              handleAvailabilityChange(day, "end", value)
+              handleAvailabilityChange("end", value)
             }
             value={availability.days?.[day]?.end || ""}
             disabled={!availability.days?.[day]?.open}
@@ -503,10 +447,8 @@ return (
               </button>
             </div>
           </div>
-        )}
 
-        {/* Back Side */}
-        {showBack && (
+          {/* Back Side */}
           <div className="absolute w-full rotate-y-180 backface-hidden bg-white p-6 rounded-2xl shadow-md text-gray-800">
             <h2 className="text-lg font-bold mb-4">Add Images, Amenities & Availability</h2>
 
@@ -535,13 +477,11 @@ return (
                 <button
                   key={item}
                   onClick={() => toggleAmenity(item)}
-                  className={
-                    `px-4 py-2 rounded-full border text-sm cursor-pointer ${
-                      selectedAmenities.includes(item)
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-800"
-                    }`
-                  }
+                  className={`px-4 py-2 rounded-full border text-sm cursor-pointer ${
+                    selectedAmenities.includes(item)
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
                 >
                   {item}
                 </button>
@@ -574,9 +514,8 @@ return (
               </button>
             </div>
           </div>
-        )}
+        </div>
       </div>
       </div>
     );
   }
-
