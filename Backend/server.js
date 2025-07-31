@@ -5,14 +5,12 @@ const cors = require("cors");
 
 const ownerRoutes = require("./Routes/Owner");
 const userRoute = require("./Routes/UserRoute");
-const turfRoutes = require("./Routes/TurfRoute"); // ✅ Add this line
+const turfRoute = require("./Routes/turfSetupRoute");
 
-// Load .env
 dotenv.config();
 
 const app = express();
 
-// ✅ Define allowed origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://sportnear-me-git-main-saumyashah18s-projects.vercel.app",
@@ -20,7 +18,7 @@ const allowedOrigins = [
   "https://sportnearme.onrender.com",
 ];
 
-// ✅ CORS middleware
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -34,21 +32,20 @@ app.use(
   })
 );
 
-// ✅ Other middleware
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Routes
+
 app.use("/api/users", userRoute);
 app.use("/api/owner", ownerRoutes);
-app.use("/api/turfs", turfRoutes); 
+app.use("/api/turfs", turfRoute);
 
-// ✅ Root route
 app.get("/", (req, res) => {
   res.send("✅ SportNearMe Backend is running!");
 });
 
-// ✅ MongoDB connection
+
 console.log("MONGO_URI from env:", process.env.MONGO_URI);
 
 mongoose
@@ -59,7 +56,6 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ✅ Server start
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
