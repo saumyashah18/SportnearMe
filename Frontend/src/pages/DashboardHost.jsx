@@ -388,7 +388,7 @@ return (
 
           <TimePicker
             onChange={(value) =>
-              handleAvailabilityChange( "start", value)
+              handleAvailabilityChange( day, "start", value)
             }
             value={availability.days?.[day]?.start || ""}
             disabled={!availability.days?.[day]?.open}
@@ -400,7 +400,7 @@ return (
 
           <TimePicker
             onChange={(value) =>
-              handleAvailabilityChange("end", value)
+              handleAvailabilityChange(day , "end", value)
             }
             value={availability.days?.[day]?.end || ""}
             disabled={!availability.days?.[day]?.open}
