@@ -6,6 +6,8 @@ const cors = require("cors");
 const ownerRoutes = require("./Routes/Owner");
 const userRoute = require("./Routes/UserRoute");
 const turfRoute = require("./Routes/turfSetupRoute");
+const slotRoutes = require("./Routes/slotRoutes");
+
 
 dotenv.config();
 
@@ -40,6 +42,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoute);
 app.use("/api/owner", ownerRoutes);
 app.use("/api/turf", turfRoute);
+app.use("/api/slots", slotRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("✅ SportNearMe Backend is running!");
