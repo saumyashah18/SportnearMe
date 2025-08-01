@@ -31,7 +31,7 @@ function App() {
         <Route path="/turfownerdashboard" element={<TurfOwnerDashboard />} />
         <Route path="/turf_profile" element={<TurfProfile />} />
         <Route path="/turfdescription" element={<TurfDescription />} />
-        <Route path="/manageturf" element={<ManageTurf />} />
+        <Route path="/manage-turf" element={<ManageTurf />} />
          <Route path="/owner_bookings" element={<OwnerBooking />} />
           <Route path="/aboutus" element={<AboutUs />} />
 
